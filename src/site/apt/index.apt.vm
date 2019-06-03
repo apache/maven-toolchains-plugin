@@ -38,8 +38,7 @@ ${project.name}
 * Usage
 
   General instructions on how to use the Toolchains Plugin can be found on the {{{./usage.html}usage page}}.
-  Last but not least, users occasionally contribute additional examples, tips or errata to the
-  {{{http://docs.codehaus.org/display/MAVENUSER/Toolchains+Plugin}plugin's wiki page}}.
+  Additionally, users can contribute to the {{{https://github.com/apache/maven-toolchains-plugin}GitHub project}}.
 
   In case you still have questions regarding the plugin's usage, please feel
   free to contact the {{{./mail-lists.html}user mailing list}}. The posts to the mailing list are archived and could
