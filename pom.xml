@@ -64,6 +64,12 @@ under the License.
     </site>
   </distributionManagement>
 
+  <contributors>
+    <contributor>
+      <name>Jim Gough</name>
+    </contributor>
+  </contributors>
+
   <properties>
     <mavenVersion>3.0</mavenVersion>
     <javaVersion>7</javaVersion>
