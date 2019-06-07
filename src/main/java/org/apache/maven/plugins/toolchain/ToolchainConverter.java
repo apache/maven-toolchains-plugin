@@ -25,7 +25,6 @@ import java.util.Map;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.AbstractConfigurationConverter;
-import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
@@ -40,11 +39,10 @@ public class ToolchainConverter
     extends AbstractConfigurationConverter
 {
 
-    public static final String ROLE = ConfigurationConverter.class.getName();
-
     /**
      * @see org.codehaus.plexus.component.configurator.converters.ConfigurationConverter#canConvert(java.lang.Class)
      */
+    @Override
     public boolean canConvert( Class type )
     {
         return ToolchainsRequirement.class.isAssignableFrom( type );
@@ -53,6 +51,7 @@ public class ToolchainConverter
     /**
      * @see org.codehaus.plexus.component.configurator.converters.ConfigurationConverter#fromConfiguration(org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup, org.codehaus.plexus.configuration.PlexusConfiguration, java.lang.Class, java.lang.Class, java.lang.ClassLoader, org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator, org.codehaus.plexus.component.configurator.ConfigurationListener)
      */
+    @Override
     public Object fromConfiguration( ConverterLookup converterLookup,
                                      PlexusConfiguration configuration,
                                      Class type, Class baseType,
@@ -73,7 +72,7 @@ public class ToolchainConverter
                                        ExpressionEvaluator expressionEvaluator )
         throws ComponentConfigurationException
     {
-        Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+        Map<String, Map<String, String>> map = new HashMap<>();
 
         PlexusConfiguration[] tools = configuration.getChildren();
         for ( PlexusConfiguration tool : tools )
@@ -81,7 +80,7 @@ public class ToolchainConverter
             String type = tool.getName();
             PlexusConfiguration[] params = tool.getChildren();
 
-            Map<String, String> parameters = new HashMap<String, String>();
+            Map<String, String> parameters = new HashMap<>();
             for ( PlexusConfiguration param : params )
             {
                     parameters.put( param.getName(), param.getValue() );

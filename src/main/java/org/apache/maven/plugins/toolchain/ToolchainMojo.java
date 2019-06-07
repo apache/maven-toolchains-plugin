@@ -31,8 +31,6 @@ import org.apache.maven.toolchain.MisconfiguredToolchainException;
 import org.apache.maven.toolchain.ToolchainManagerPrivate;
 import org.apache.maven.toolchain.ToolchainPrivate;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +69,7 @@ public class ToolchainMojo
     @Parameter( required = true )
     private ToolchainsRequirement toolchains;
 
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -81,7 +80,7 @@ public class ToolchainMojo
             return;
         }
 
-        List<String> nonMatchedTypes = new ArrayList<String>();
+        List<String> nonMatchedTypes = new ArrayList<>();
 
         for ( Map.Entry<String, Map<String, String>> entry : toolchains.getToolchains().entrySet() )
         {
@@ -101,14 +100,14 @@ public class ToolchainMojo
 
             for ( String type : nonMatchedTypes )
             {
-                buff.append( '\n' );
+                buff.append( System.lineSeparator() );
                 buff.append( getToolchainRequirementAsString( type, toolchains.getParams( type ) ) );
             }
 
             getLog().error( buff.toString() );
 
-            throw new MojoFailureException( buff.toString()
-                + "\nPlease make sure you define the required toolchains in your ~/.m2/toolchains.xml file." );
+            throw new MojoFailureException( buff.toString() + System.lineSeparator()
+                + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file." );
         }
     }
 
@@ -181,49 +180,7 @@ public class ToolchainMojo
     private ToolchainPrivate[] getToolchains( String type )
         throws MojoExecutionException, MisconfiguredToolchainException
     {
-        Class<?> managerClass = toolchainManagerPrivate.getClass();
-
-        try
-        {
-            try
-            {
-                // try 3.x style API
-                Method newMethod =
-                    managerClass.getMethod( "getToolchainsForType", new Class[] { String.class, MavenSession.class } );
-
-                return (ToolchainPrivate[]) newMethod.invoke( toolchainManagerPrivate, type, session );
-            }
-            catch ( NoSuchMethodException e )
-            {
-                // try 2.x style API
-                Method oldMethod = managerClass.getMethod( "getToolchainsForType", new Class[] { String.class } );
-
-                return (ToolchainPrivate[]) oldMethod.invoke( toolchainManagerPrivate, type );
-            }
-        }
-        catch ( NoSuchMethodException e )
-        {
-            throw new MojoExecutionException( "Incompatible toolchain API", e );
-        }
-        catch ( IllegalAccessException e )
-        {
-            throw new MojoExecutionException( "Incompatible toolchain API", e );
-        }
-        catch ( InvocationTargetException e )
-        {
-            Throwable cause = e.getCause();
-
-            if ( cause instanceof RuntimeException )
-            {
-                throw (RuntimeException) cause;
-            }
-            if ( cause instanceof MisconfiguredToolchainException )
-            {
-                throw (MisconfiguredToolchainException) cause;
-            }
-
-            throw new MojoExecutionException( "Incompatible toolchain API", e );
-        }
+        return toolchainManagerPrivate.getToolchainsForType( type, session );
     }
 
 }
