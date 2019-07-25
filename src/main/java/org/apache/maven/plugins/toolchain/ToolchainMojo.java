@@ -69,6 +69,13 @@ public class ToolchainMojo
     @Parameter( required = true )
     private ToolchainsRequirement toolchains;
 
+    /**
+     * Flag to fail the build if toolchain requirements not met.
+     * @since 3.0.1
+     */
+    @Parameter( defaultValue = "true" )
+    private boolean fail;
+
     @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -104,10 +111,17 @@ public class ToolchainMojo
                 buff.append( getToolchainRequirementAsString( type, toolchains.getParams( type ) ) );
             }
 
-            getLog().error( buff.toString() );
+            if ( fail )
+            {
+                getLog().error( buff.toString() );
 
-            throw new MojoFailureException( buff.toString() + System.lineSeparator()
-                + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file." );
+                throw new MojoFailureException( buff.toString() + System.lineSeparator()
+                    + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file." );
+            }
+            else
+            {
+                getLog().warn( buff.toString() );
+            }
         }
     }
 
