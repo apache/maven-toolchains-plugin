@@ -62,14 +62,13 @@ public class ToolchainConverter
     {
         ToolchainsRequirement retValue = new ToolchainsRequirement();
 
-        processConfiguration( retValue, configuration, expressionEvaluator );
+        processConfiguration( retValue, configuration );
 
         return retValue;
     }
 
     private void processConfiguration( ToolchainsRequirement requirement,
-                                       PlexusConfiguration configuration,
-                                       ExpressionEvaluator expressionEvaluator )
+                                       PlexusConfiguration configuration )
         throws ComponentConfigurationException
     {
         Map<String, Map<String, String>> map = new HashMap<>();
