@@ -178,7 +178,7 @@ public class ToolchainMojo
     }
 
     private ToolchainPrivate[] getToolchains( String type )
-        throws MojoExecutionException, MisconfiguredToolchainException
+        throws MisconfiguredToolchainException
     {
         return toolchainManagerPrivate.getToolchainsForType( type, session );
     }

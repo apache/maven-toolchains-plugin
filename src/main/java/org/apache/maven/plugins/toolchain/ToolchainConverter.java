@@ -22,7 +22,6 @@ package org.apache.maven.plugins.toolchain;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.AbstractConfigurationConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
@@ -58,7 +57,6 @@ public class ToolchainConverter
                                      ClassLoader classLoader,
                                      ExpressionEvaluator expressionEvaluator,
                                      ConfigurationListener listener )
-        throws ComponentConfigurationException
     {
         ToolchainsRequirement retValue = new ToolchainsRequirement();
 
@@ -69,7 +67,6 @@ public class ToolchainConverter
 
     private void processConfiguration( ToolchainsRequirement requirement,
                                        PlexusConfiguration configuration )
-        throws ComponentConfigurationException
     {
         Map<String, Map<String, String>> map = new HashMap<>();
 
