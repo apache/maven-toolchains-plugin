@@ -33,7 +33,7 @@ ${project.name}
 
   The Toolchains plugin has one goal:
 
-  * {{{./toolchain-mojo.html}toolchain:toolchain}} checks that toolchains requirements are met by currently configured toolchains.
+  * {{{./toolchain-mojo.html}toolchains:toolchain}} checks that toolchains requirements are met by currently configured toolchains.
 
 * Usage
 
