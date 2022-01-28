@@ -42,7 +42,8 @@ import java.util.Map;
  * @author mkleint
  */
 @Mojo( name = "toolchain", defaultPhase = LifecyclePhase.VALIDATE,
-       configurator = "toolchains-requirement-configurator" )
+       configurator = "toolchains-requirement-configurator",
+       threadSafe = true )
 public class ToolchainMojo
     extends AbstractMojo
 {
