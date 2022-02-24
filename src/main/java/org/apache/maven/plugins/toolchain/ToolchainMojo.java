@@ -19,17 +19,17 @@ package org.apache.maven.plugins.toolchain;
  * under the License.
  */
 
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.toolchain.MisconfiguredToolchainException;
-import org.apache.maven.toolchain.ToolchainManagerPrivate;
-import org.apache.maven.toolchain.ToolchainPrivate;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.Toolchain;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Component;
+import org.apache.maven.api.plugin.annotations.LifecyclePhase;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.ToolchainManager;
+import org.apache.maven.api.services.ToolchainManagerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,19 +44,21 @@ import java.util.Map;
 @Mojo( name = "toolchain", defaultPhase = LifecyclePhase.VALIDATE,
        configurator = "toolchains-requirement-configurator" )
 public class ToolchainMojo
-    extends AbstractMojo
+    implements org.apache.maven.api.plugin.Mojo
 {
 
+    private Logger log = LoggerFactory.getLogger( getClass() );
+    
     /**
      */
     @Component
-    private ToolchainManagerPrivate toolchainManagerPrivate;
+    private ToolchainManager toolchainManager;
 
     /**
      * The current build session instance. This is used for toolchain manager API calls.
      */
     @Parameter( defaultValue = "${session}", readonly = true, required = true )
-    private MavenSession session;
+    private Session session;
 
     /**
      * Toolchains requirements, specified by one
@@ -71,12 +73,12 @@ public class ToolchainMojo
 
     @Override
     public void execute()
-        throws MojoExecutionException, MojoFailureException
+        throws MojoException
     {
         if ( toolchains == null )
         {
             // should not happen since parameter is required...
-            getLog().warn( "No toolchains requirements configured." );
+            log.warn( "No toolchains requirements configured." );
             return;
         }
 
@@ -104,9 +106,9 @@ public class ToolchainMojo
                 buff.append( getToolchainRequirementAsString( type, toolchains.getParams( type ) ) );
             }
 
-            getLog().error( buff.toString() );
+            log.error( buff.toString() );
 
-            throw new MojoFailureException( buff.toString() + System.lineSeparator()
+            throw new MojoException( buff.toString() + System.lineSeparator()
                 + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file." );
         }
     }
@@ -136,16 +138,16 @@ public class ToolchainMojo
     }
 
     protected boolean selectToolchain( String type, Map<String, String> params )
-        throws MojoExecutionException
+        throws MojoException
     {
-        getLog().info( "Required toolchain: " + getToolchainRequirementAsString( type, params ) );
+        log.info( "Required toolchain: " + getToolchainRequirementAsString( type, params ) );
         int typeFound = 0;
 
         try
         {
-            ToolchainPrivate[] tcs = getToolchains( type );
+            List<Toolchain> tcs = getToolchains( type );
 
-            for ( ToolchainPrivate tc : tcs )
+            for ( Toolchain tc : tcs )
             {
                 if ( !type.equals( tc.getType() ) )
                 {
@@ -157,30 +159,30 @@ public class ToolchainMojo
 
                 if ( tc.matchesRequirements( params ) )
                 {
-                    getLog().info( "Found matching toolchain for type " + type + ": " + tc );
+                    log.info( "Found matching toolchain for type " + type + ": " + tc );
 
                     // store matching toolchain to build context
-                    toolchainManagerPrivate.storeToolchainToBuildContext( tc, session );
+                    toolchainManager.storeToolchainToBuildContext( session, tc );
 
                     return true;
                 }
             }
         }
-        catch ( MisconfiguredToolchainException ex )
+        catch ( ToolchainManagerException ex )
         {
-            throw new MojoExecutionException( "Misconfigured toolchains.", ex );
+            throw new MojoException( "Misconfigured toolchains.", ex );
         }
 
-        getLog().error( "No toolchain " + ( ( typeFound == 0 ) ? "found" : ( "matched from " + typeFound + " found" ) )
+        log.error( "No toolchain " + ( ( typeFound == 0 ) ? "found" : ( "matched from " + typeFound + " found" ) )
                             + " for type " + type );
 
         return false;
     }
 
-    private ToolchainPrivate[] getToolchains( String type )
-        throws MojoExecutionException, MisconfiguredToolchainException
+    private List<Toolchain> getToolchains( String type )
+        throws MojoException, ToolchainManagerException
     {
-        return toolchainManagerPrivate.getToolchainsForType( type, session );
+        return toolchainManager.getToolchainsForType( session, type );
     }
 
 }
