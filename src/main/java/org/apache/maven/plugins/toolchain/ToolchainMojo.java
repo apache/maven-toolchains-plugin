@@ -42,10 +42,12 @@ import java.util.Map;
  * @author mkleint
  */
 @Mojo( name = "toolchain", defaultPhase = LifecyclePhase.VALIDATE,
-       configurator = "toolchains-requirement-configurator" )
+       configurator = "toolchains-requirement-configurator",
+       threadSafe = true )
 public class ToolchainMojo
     extends AbstractMojo
 {
+    private static final Object LOCK = new Object();
 
     /**
      */
@@ -160,7 +162,10 @@ public class ToolchainMojo
                     getLog().info( "Found matching toolchain for type " + type + ": " + tc );
 
                     // store matching toolchain to build context
-                    toolchainManagerPrivate.storeToolchainToBuildContext( tc, session );
+                    synchronized ( LOCK )
+                    {
+                        toolchainManagerPrivate.storeToolchainToBuildContext( tc, session );
+                    }
 
                     return true;
                 }
