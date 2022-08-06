@@ -19,8 +19,11 @@ package org.apache.maven.plugins.toolchain;
  * under the License.
  */
 
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
@@ -70,7 +73,6 @@ public class ToolchainConverter
     private void processConfiguration( ToolchainsRequirement requirement,
                                        PlexusConfiguration configuration,
                                        ExpressionEvaluator expressionEvaluator )
-        throws ComponentConfigurationException
     {
         Map<String, Map<String, String>> map = new HashMap<>();
 
@@ -80,14 +82,19 @@ public class ToolchainConverter
             String type = tool.getName();
             PlexusConfiguration[] params = tool.getChildren();
 
-            Map<String, String> parameters = new HashMap<>();
-            for ( PlexusConfiguration param : params )
-            {
-                    parameters.put( param.getName(), param.getValue() );
-            }
+            Map<String, String> parameters =
+                    Arrays.stream( params ).collect( Collectors.toMap( PlexusConfiguration::getName,
+                            PlexusConfiguration::getValue ) );
             map.put( type, parameters );
         }
 
+        Arrays.stream( configuration.getChildren() )
+        .map( s ->
+            new AbstractMap.SimpleEntry<>( s.getName(),
+                    Arrays.stream( s.getChildren() ).collect( Collectors.toMap( PlexusConfiguration::getName,
+                            PlexusConfiguration::getValue ) ) )
+
+        ).collect( Collectors.toMap( k -> k, v -> v ) );
         requirement.toolchains = map;
     }
 }
