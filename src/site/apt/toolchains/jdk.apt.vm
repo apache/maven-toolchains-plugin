@@ -67,7 +67,7 @@ JDK Toolchain
   For selection of toolchain for use by the project, the following conditions are matched
   against the definitions in the <<<toolchains.xml>>> file:
 
-  * "<<<version>>>" which accepts any {{{/plugins/maven-enforcer-plugin/rules/versionRanges.html}version range definitions}}.
+  * "<<<version>>>" which accepts any {{{/enforcer/enforcer-rules/versionRanges.html}version range definitions}}.
     Version declared by the toolchain needs to fit into the range,
 
   * any other tokens needs exact match. Toolchain not providing such token will not be selected.
