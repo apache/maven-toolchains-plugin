@@ -25,9 +25,9 @@
 
 ${project.name}
 
-  The Toolchains Plugins allows to share configuration across plugins.
-  For example to make sure the plugins like compiler, surefire, javadoc, webstart etc. all use the same JDK for execution.
-  Similarly to maven-enforcer-plugin, it allows you to control environmental constraints in the build.
+  The Toolchains Plugins enables sharing configuration across plugins,
+  for example to make sure the plugins like compiler, surefire, javadoc, webstart etc. all use the same JDK for execution.
+  Similarly to the maven-enforcer-plugin, it allows you to control environmental constraints in the build.
 
 * Goals Overview
 
@@ -40,15 +40,15 @@ ${project.name}
   General instructions on how to use the Toolchains Plugin can be found on the {{{./usage.html}usage page}}.
   Additionally, users can contribute to the {{{https://github.com/apache/maven-toolchains-plugin}GitHub project}}.
 
-  In case you still have questions regarding the plugin's usage, please feel
-  free to contact the {{{./mailing-lists.html}user mailing list}}. The posts to the mailing list are archived and could
+  If you have questions regarding the plugin's usage, 
+  contact the {{{./mailing-lists.html}user mailing list}}. Posts to the mailing list are archived and could
   already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
   the {{{./mailing-lists.html}mail archive}}.
 
-  If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
+  If you feel like the plugin is missing a feature or has a defect, you can file a feature request or bug report in our
   {{{./issue-management.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
   concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
   entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
   Of course, patches are welcome, too. Contributors can check out the project from our
   {{{./scm.html}source repository}} and will find supplementary information in the
-  {{{http://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
+  {{{https://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
