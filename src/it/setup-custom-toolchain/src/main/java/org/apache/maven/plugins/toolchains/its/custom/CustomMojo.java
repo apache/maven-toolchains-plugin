@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.toolchains.its.custom;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.plugins.toolchains.its.custom;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.toolchains.its.custom;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -29,36 +28,32 @@ import org.apache.maven.toolchain.ToolchainManager;
 
 /**
  * A sample Mojo that uses the custom toolchain.
- * 
+ *
  * @author Hervé Boutemy
  */
-@Mojo( name = "tool" )
-public class CustomMojo
-    extends AbstractMojo
-{
+@Mojo(name = "tool")
+public class CustomMojo extends AbstractMojo {
 
     @Component
     private ToolchainManager toolchainManager;
 
-    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    @Parameter(defaultValue = "${session}", required = true, readonly = true)
     private MavenSession session;
 
-    public void execute()
-        throws MojoExecutionException
-    {
+    public void execute() throws MojoExecutionException {
         // get the custom toolchain
-        CustomToolchain toolchain = (CustomToolchain) toolchainManager.getToolchainFromBuildContext( "custom", session );
+        CustomToolchain toolchain = (CustomToolchain) toolchainManager.getToolchainFromBuildContext("custom", session);
 
-        if ( toolchain == null )
-        {
-            throw new MojoExecutionException( "Could not find 'custom' toolchain: please check maven-toolchains-plugin configuration." );
+        if (toolchain == null) {
+            throw new MojoExecutionException(
+                    "Could not find 'custom' toolchain: please check maven-toolchains-plugin configuration.");
         }
 
-        getLog().info( "Found 'custom' toolchain in build context." );
+        getLog().info("Found 'custom' toolchain in build context.");
 
         // get a tool from the toolchain
-        String path = toolchain.findTool( "tool" );
+        String path = toolchain.findTool("tool");
 
-        getLog().info( "Found expected tool named 'tool' at following location: " + path );
+        getLog().info("Found expected tool named 'tool' at following location: " + path);
     }
 }
