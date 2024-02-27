@@ -27,6 +27,9 @@ import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+/**
+ * Run the JDK discoverer and display a summary of found toolchains.
+ */
 @Mojo(name = "display-discovered-jdk-toolchains", requiresProject = false)
 public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
 

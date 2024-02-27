@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -48,7 +47,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
- * Implementation of ToolchainDiscoverer service
+ * Toolchain discoverer service
  */
 public class ToolchainDiscoverer {
 
@@ -216,17 +215,12 @@ public class ToolchainDiscoverer {
         }
 
         Map<String, String> properties = new LinkedHashMap<>();
-        for (String name : Arrays.asList(
-                "java.version", "java.runtime.name", "java.runtime.version", "java.vendor", "java.vendor.version")) {
-            String v = lines.stream()
-                    .filter(l -> l.contains(name))
+        for (String name : Arrays.asList("version", "runtime.name", "runtime.version", "vendor", "vendor.version")) {
+            lines.stream()
+                    .filter(l -> l.contains("java." + name))
                     .map(l -> l.replaceFirst(".*=\\s*(.*)", "$1"))
                     .findFirst()
-                    .orElse(null);
-            String k = name.substring(5);
-            if (v != null) {
-                properties.put(k, v);
-            }
+                    .ifPresent(value -> properties.put(name, value));
         }
         if (!properties.containsKey("version")) {
             log.debug("JDK toolchain discovered at " + jdk + " will be ignored: could not obtain java.version");
@@ -285,7 +279,11 @@ public class ToolchainDiscoverer {
     }
 
     private Set<Path> findJdks() {
-        Set<Path> jdks = new HashSet<>();
+        // check environment variables for JAVA{xx}_HOME
+        List<Path> dirsToTest = System.getenv().entrySet().stream()
+                .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
+                .map(e -> Paths.get(e.getValue()))
+                .collect(Collectors.toList());
         final String userHome = System.getProperty("user.home");
         List<Path> installedDirs = new ArrayList<>();
         // jdk installed by third
@@ -299,10 +297,12 @@ public class ToolchainDiscoverer {
         installedDirs.add(Paths.get(userHome, ".jabba/jdk"));
         // os related directories
         String osname = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        if (osname.startsWith("mac")) {
+        boolean macos = osname.startsWith("mac");
+        boolean win = osname.startsWith("win");
+        if (macos) {
             installedDirs.add(Paths.get("/Library/Java/JavaVirtualMachines"));
             installedDirs.add(Paths.get(userHome, "Library/Java/JavaVirtualMachines"));
-        } else if (osname.startsWith("win")) {
+        } else if (win) {
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
         } else {
             installedDirs.add(Paths.get("/usr/jdk"));
@@ -312,21 +312,24 @@ public class ToolchainDiscoverer {
         }
         for (Path dest : installedDirs) {
             if (Files.isDirectory(dest)) {
-                try {
-                    List<Path> subdirs = Files.list(dest).collect(Collectors.toList());
-                    for (Path subdir : subdirs) {
-                        if (Files.exists(subdir.resolve("bin/javac"))
-                                || Files.exists(subdir.resolve("bin/javac.exe"))) {
-                            jdks.add(getCanonicalPath(subdir));
-                        } else if (Files.exists(subdir.resolve("Contents/Home/bin/javac"))) {
-                            jdks.add(getCanonicalPath(subdir.resolve("Contents/Home")));
-                        }
-                    }
+                try (Stream<Path> stream = Files.list(dest)) {
+                    stream.forEach(dir -> {
+                        dirsToTest.add(dir);
+                        dirsToTest.add(dir.resolve("Contents/Home"));
+                    });
                 } catch (IOException e) {
                     // ignore
                 }
             }
         }
-        return jdks;
+        // only keep directories that have a javac file
+        return dirsToTest.stream()
+                .filter(ToolchainDiscoverer::hasJavaC)
+                .map(ToolchainDiscoverer::getCanonicalPath)
+                .collect(Collectors.toSet());
+    }
+
+    private static boolean hasJavaC(Path subdir) {
+        return Files.exists(subdir.resolve("bin/javac")) || Files.exists(subdir.resolve("bin/javac.exe"));
     }
 }
