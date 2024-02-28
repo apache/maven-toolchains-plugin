@@ -236,15 +236,12 @@ public class ToolchainDiscoverer {
     }
 
     ToolchainModel getToolchainModel(Path jdk) {
-        log.debug("Computing model for " + jdk);
-
         ToolchainModel model = cache.get(jdk);
         if (model == null) {
             model = doGetToolchainModel(jdk);
             cache.put(jdk, model);
             cacheModified = true;
         }
-
         return model;
     }
 
