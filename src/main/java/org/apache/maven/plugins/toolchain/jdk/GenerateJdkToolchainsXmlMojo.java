@@ -20,6 +20,7 @@ package org.apache.maven.plugins.toolchain.jdk;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -67,7 +68,7 @@ public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {
                 new MavenToolchainsXpp3Writer().write(writer, toolchains);
                 System.out.println(writer);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new MojoFailureException("Unable to generate toolchains.xml", e);
         }
     }

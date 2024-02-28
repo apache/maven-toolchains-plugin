@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.toolchain.model.PersistedToolchains;
@@ -57,21 +56,15 @@ public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
     ToolchainDiscoverer discoverer;
 
     @Override
-    public void execute() throws MojoFailureException {
-        try {
-            PersistedToolchains toolchains = discoverer.discoverToolchains(comparator);
-            List<ToolchainModel> models = toolchains.getToolchains();
-            getLog().info("Discovered " + models.size() + " JDK toolchains:");
-            for (ToolchainModel model : models) {
-                getLog().info("  - "
-                        + ((Xpp3Dom) model.getConfiguration())
-                                .getChild("jdkHome")
-                                .getValue());
-                getLog().info("    provides:");
-                model.getProvides().forEach((k, v) -> getLog().info("      " + k + ": " + v));
-            }
-        } catch (Exception e) {
-            throw new MojoFailureException("Unable to retrieve discovered toolchains", e);
+    public void execute() {
+        PersistedToolchains toolchains = discoverer.discoverToolchains(comparator);
+        List<ToolchainModel> models = toolchains.getToolchains();
+        getLog().info("Discovered " + models.size() + " JDK toolchains:");
+        for (ToolchainModel model : models) {
+            getLog().info("  - "
+                    + ((Xpp3Dom) model.getConfiguration()).getChild("jdkHome").getValue());
+            getLog().info("    provides:");
+            model.getProvides().forEach((k, v) -> getLog().info("      " + k + ": " + v));
         }
     }
 }
