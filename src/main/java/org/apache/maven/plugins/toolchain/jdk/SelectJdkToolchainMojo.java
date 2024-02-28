@@ -49,8 +49,7 @@ import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VENDOR;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VERSION;
 
 /**
- * Check that toolchains requirements are met by currently configured toolchains and
- * store the selected toolchains in build context for later retrieval by other plugins.
+ * Discover JDK toolchains and select a matching one.
  */
 @Mojo(name = "select-jdk-toolchain", defaultPhase = LifecyclePhase.VALIDATE)
 public class SelectJdkToolchainMojo extends AbstractMojo {

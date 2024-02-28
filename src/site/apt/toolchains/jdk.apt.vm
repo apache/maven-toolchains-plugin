@@ -25,6 +25,7 @@
 
 JDK Toolchain
 
+Note that this page refers to hand-written JDK toolchains.  For a simpler setup, look at the {{{./discovery.html}discovery mechanism}}.
 
 * Toolchain Identification
 

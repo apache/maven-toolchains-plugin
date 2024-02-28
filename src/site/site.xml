@@ -32,6 +32,7 @@ under the License.
       <item name="Download" href="download.html"/>
     </menu>
     <menu name="Toolchains">
+      <item name="Discovery mechanism" href="toolchains/discovery.html"/>
       <item name="Standard Toolchains" href="toolchains/index.html"/>
       <item name="JDK Standard Toolchain" href="toolchains/jdk.html"/>
       <item name="Custom Toolchains" href="toolchains/custom.html"/>

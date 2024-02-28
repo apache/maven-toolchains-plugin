@@ -29,8 +29,11 @@ import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+import static java.util.Comparator.comparing;
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.SORTED_PROVIDES;
+
 /**
- * Run the JDK discoverer and display a summary of found toolchains.
+ * Discover the JDK toolchains and print them to the console.
  */
 @Mojo(name = "display-discovered-jdk-toolchains", requiresProject = false)
 public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
@@ -64,7 +67,9 @@ public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
             getLog().info("  - "
                     + ((Xpp3Dom) model.getConfiguration()).getChild("jdkHome").getValue());
             getLog().info("    provides:");
-            model.getProvides().forEach((k, v) -> getLog().info("      " + k + ": " + v));
+            model.getProvides().entrySet().stream()
+                    .sorted(comparing(e -> SORTED_PROVIDES.indexOf(e.getKey().toString())))
+                    .forEach(e -> getLog().info("      " + e.getKey() + ": " + e.getValue()));
         }
     }
 }

@@ -35,7 +35,7 @@ import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Writer;
 
 /**
- * Run the JDK discovery mechanism and generates the toolchains XML.
+ * Run the JDK toolchain discovery mechanism and generates a toolchains XML.
  */
 @Mojo(name = "generate-jdk-toolchains-xml", requiresProject = false)
 public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {

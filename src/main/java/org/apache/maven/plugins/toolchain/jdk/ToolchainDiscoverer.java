@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Comparator.comparing;
 import static org.apache.maven.plugins.toolchain.jdk.SelectJdkToolchainMojo.TOOLCHAIN_TYPE_JDK;
 
 /**
@@ -69,11 +71,14 @@ public class ToolchainDiscoverer {
     public static final String VENDOR_VERSION = "vendor.version";
     public static final String[] PROPERTIES = {VERSION, RUNTIME_NAME, RUNTIME_VERSION, VENDOR, VENDOR_VERSION};
 
-    public static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-toolchains-cache.xml";
-
     public static final String CURRENT = "current";
     public static final String ENV = "env";
     public static final String LTS = "lts";
+
+    public static final List<String> SORTED_PROVIDES = Collections.unmodifiableList(
+            Arrays.asList(VERSION, RUNTIME_NAME, RUNTIME_VERSION, VENDOR, VENDOR_VERSION, CURRENT, LTS, ENV));
+
+    public static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-toolchains-cache.xml";
 
     public static final String JDK_HOME = "jdkHome";
     public static final String JAVA_HOME = "java.home";
@@ -338,23 +343,23 @@ public class ToolchainDiscoverer {
     }
 
     Comparator<ToolchainModel> lts() {
-        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(LTS) ? -1 : +1);
+        return comparing((ToolchainModel tc) -> tc.getProvides().containsKey(LTS) ? -1 : +1);
     }
 
     Comparator<ToolchainModel> vendor() {
-        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VENDOR));
+        return comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VENDOR));
     }
 
     Comparator<ToolchainModel> env() {
-        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(ENV) ? -1 : +1);
+        return comparing((ToolchainModel tc) -> tc.getProvides().containsKey(ENV) ? -1 : +1);
     }
 
     Comparator<ToolchainModel> current() {
-        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(CURRENT) ? -1 : +1);
+        return comparing((ToolchainModel tc) -> tc.getProvides().containsKey(CURRENT) ? -1 : +1);
     }
 
     Comparator<ToolchainModel> version() {
-        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VERSION), (v1, v2) -> {
+        return comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VERSION), (v1, v2) -> {
                     String[] a = v1.split("\\.");
                     String[] b = v2.split("\\.");
                     int length = Math.min(a.length, b.length);
