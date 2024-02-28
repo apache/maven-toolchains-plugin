@@ -34,7 +34,7 @@ JDK Toolchain
 
   * "<<<version>>>" marks the version of the JDK. This can be either a single version or a version range.
 
-  * Other are accepted, but only exact matches are supported.
+  * Other tokens are accepted, but only exact matches are supported.
 
   []
 
@@ -62,15 +62,16 @@ JDK Toolchain
 </toolchains>
 +---+
 
-This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide". A project can request toolchain
-by specifying the type "jdk" and the version "11". It can also use a version range that includes 11 like [8, 17].
-It can also ask for the vendor temurin, with or without version, or the purpose "for_mevenide". 
+This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
+A project can request this toolchain by specifying the type "jdk" and the version "11".
+It can also use a version range that includes 11 like [8, 17]. It can also ask for the
+vendor temurin, with or without version, or the purpose "for_mevenide". 
 
 
 * Toolchains Plugin Configuration
 
 
-A project specifies a toolchain in the conmfiguraiton of the maven-toolchains-plugin like so: 
+A project specifies a toolchain in the configuraiton of the maven-toolchains-plugin like so: 
 
 +---+
 <project>
