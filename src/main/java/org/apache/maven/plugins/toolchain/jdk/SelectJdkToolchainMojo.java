@@ -250,11 +250,11 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
     private boolean matches(String key, String reqVal, String tcVal) {
         switch (key) {
             case VERSION:
-                return RequirementMatcherFactory.createVersionMatcher(reqVal).matches(tcVal);
+                return RequirementMatcherFactory.createVersionMatcher(tcVal).matches(reqVal);
             case ENV:
                 return reqVal.matches("(.*,|^)\\Q" + tcVal + "\\E(,.*|$)");
             default:
-                return RequirementMatcherFactory.createExactMatcher(reqVal).matches(tcVal);
+                return RequirementMatcherFactory.createExactMatcher(tcVal).matches(reqVal);
         }
     }
 
