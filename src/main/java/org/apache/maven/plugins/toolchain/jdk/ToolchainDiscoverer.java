@@ -124,7 +124,6 @@ public class ToolchainDiscoverer {
         try {
             Set<Path> jdks = findJdks();
             log.info("Found " + jdks.size() + " possible jdks: " + jdks);
-            cacheModified = false;
             readCache();
             Map<Path, Map<String, String>> flags = new HashMap<>();
             Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty(JAVA_HOME)));
@@ -152,9 +151,7 @@ public class ToolchainDiscoverer {
                     })
                     .sorted(getToolchainModelComparator(comparator))
                     .collect(Collectors.toList());
-            if (this.cacheModified) {
-                writeCache();
-            }
+            writeCache();
             PersistedToolchains ps = new PersistedToolchains();
             ps.setToolchains(tcs);
             return ps;
@@ -179,6 +176,7 @@ public class ToolchainDiscoverer {
     private void readCache() {
         try {
             cache = new ConcurrentHashMap<>();
+            cacheModified = false;
             Path cacheFile = getCacheFile();
             if (Files.isRegularFile(cacheFile)) {
                 try (Reader r = Files.newBufferedReader(cacheFile)) {
@@ -188,7 +186,7 @@ public class ToolchainDiscoverer {
                             .filter(tc -> {
                                 // If the bin/java executable is not available anymore, remove this TC
                                 if (!hasJavaC(getJdkHome(tc))) {
-                                    cacheModified = false;
+                                    cacheModified = true;
                                     return false;
                                 } else {
                                     return true;
@@ -198,30 +196,43 @@ public class ToolchainDiscoverer {
                 }
             }
         } catch (IOException | XmlPullParserException e) {
-            log.warn("Error reading toolchains cache: " + e);
+            log.debug("Error reading toolchains cache: " + e, e);
         }
     }
 
     private void writeCache() {
         try {
-            Path cacheFile = getCacheFile();
-            Files.createDirectories(cacheFile.getParent());
-            try (Writer w = Files.newBufferedWriter(cacheFile)) {
-                PersistedToolchains pt = new PersistedToolchains();
-                pt.setToolchains(cache.values().stream()
-                        .map(tc -> {
-                            ToolchainModel model = tc.clone();
-                            model.getProvides().remove(CURRENT);
-                            model.getProvides().remove(ENV);
-                            return model;
-                        })
-                        .sorted(version().thenComparing(vendor()))
-                        .collect(Collectors.toList()));
-                new MavenToolchainsXpp3Writer().write(w, pt);
+            if (cacheModified) {
+                Path cacheFile = getCacheFile();
+                Files.createDirectories(cacheFile.getParent());
+                try (Writer w = Files.newBufferedWriter(cacheFile)) {
+                    PersistedToolchains pt = new PersistedToolchains();
+                    pt.setToolchains(cache.values().stream()
+                            .map(tc -> {
+                                ToolchainModel model = tc.clone();
+                                // Remove transient information
+                                model.getProvides().remove(CURRENT);
+                                model.getProvides().remove(ENV);
+                                return model;
+                            })
+                            .sorted(version().thenComparing(vendor()))
+                            .collect(Collectors.toList()));
+                    new MavenToolchainsXpp3Writer().write(w, pt);
+                }
             }
         } catch (IOException e) {
-            log.warn("Error writing toolchains cache: " + e);
+            log.debug("Error writing toolchains cache: " + e, e);
         }
+    }
+
+    ToolchainModel getToolchainModel(Path jdk) {
+        ToolchainModel model = cache.get(jdk);
+        if (model == null) {
+            model = doGetToolchainModel(jdk);
+            cache.put(jdk, model);
+            cacheModified = true;
+        }
+        return model;
     }
 
     private static Path getCacheFile() {
@@ -233,16 +244,6 @@ public class ToolchainDiscoverer {
         Xpp3Dom javahome = dom != null ? dom.getChild(JDK_HOME) : null;
         String jdk = javahome != null ? javahome.getValue() : null;
         return Paths.get(Objects.requireNonNull(jdk));
-    }
-
-    ToolchainModel getToolchainModel(Path jdk) {
-        ToolchainModel model = cache.get(jdk);
-        if (model == null) {
-            model = doGetToolchainModel(jdk);
-            cache.put(jdk, model);
-            cacheModified = true;
-        }
-        return model;
     }
 
     ToolchainModel doGetToolchainModel(Path jdk) {
