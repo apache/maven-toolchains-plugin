@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -127,23 +126,24 @@ public class ToolchainDiscoverer {
             log.info("Found " + jdks.size() + " possible jdks: " + jdks);
             cacheModified = false;
             readCache();
-            Map<Path, Set<String>> flags = new HashMap<>();
+            Map<Path, Map<String, String>> flags = new HashMap<>();
             Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty(JAVA_HOME)));
-            flags.computeIfAbsent(currentJdkHome, p -> new HashSet<>()).add(CURRENT);
+            flags.computeIfAbsent(currentJdkHome, p -> new HashMap<>()).put(CURRENT, "true");
             // check environment variables for JAVA{xx}_HOME
             System.getenv().entrySet().stream()
                     .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
-                    .map(e -> Paths.get(e.getValue()))
-                    .map(ToolchainDiscoverer::getCanonicalPath)
-                    .forEach(path ->
-                            flags.computeIfAbsent(path, p -> new HashSet<>()).add(ENV));
+                    .forEach(e -> {
+                        Path path = getCanonicalPath(Paths.get(e.getValue()));
+                        Map<String, String> f = flags.computeIfAbsent(path, p -> new HashMap<>());
+                        String val = f.getOrDefault(ENV, "");
+                        f.put(ENV, (val.isEmpty() ? "" : val + ",") + e.getKey());
+                    });
 
             List<ToolchainModel> tcs = jdks.parallelStream()
                     .map(s -> {
                         ToolchainModel tc = getToolchainModel(s);
-                        for (String flag : flags.getOrDefault(s, Collections.emptySet())) {
-                            tc.getProvides().setProperty(flag, "true");
-                        }
+                        flags.getOrDefault(s, Collections.emptyMap())
+                                .forEach((k, v) -> tc.getProvides().setProperty(k, v));
                         String version = tc.getProvides().getProperty(VERSION);
                         if (isLts(version)) {
                             tc.getProvides().setProperty(LTS, "true");

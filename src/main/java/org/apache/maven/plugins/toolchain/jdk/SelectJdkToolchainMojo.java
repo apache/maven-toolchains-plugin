@@ -34,6 +34,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.toolchain.MisconfiguredToolchainException;
+import org.apache.maven.toolchain.RequirementMatcherFactory;
 import org.apache.maven.toolchain.ToolchainFactory;
 import org.apache.maven.toolchain.ToolchainManagerPrivate;
 import org.apache.maven.toolchain.ToolchainPrivate;
@@ -41,6 +42,7 @@ import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.ENV;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.RUNTIME_NAME;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.RUNTIME_VERSION;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VENDOR;
@@ -88,6 +90,15 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
      */
     @Parameter(property = "toolchain.jdk.vendor")
     private String vendor;
+
+    /**
+     * The env constraint for the JDK toolchain to select.
+     * To match the constraint, an environment variable with the given name must point to the JDK.
+     * For example, if you define {@code JAVA11_HOME=~/jdks/my-jdk-11.0.1}, you can specify
+     * {@code env=JAVA11_HOME} to match the given JDK.
+     */
+    @Parameter(property = "toolchain.jdk.env")
+    private String env;
 
     /**
      * The matching mode, either {@code IfMatch} (the default), {@code IfSame}, or {@code Never}.
@@ -156,7 +167,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
     }
 
     private void doExecute() throws MisconfiguredToolchainException, MojoFailureException {
-        if (version == null && runtimeName == null && runtimeVersion == null && vendor == null) {
+        if (version == null && runtimeName == null && runtimeVersion == null && vendor == null && env == null) {
             return;
         }
 
@@ -165,21 +176,20 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
         Optional.ofNullable(runtimeName).ifPresent(v -> requirements.put(RUNTIME_NAME, v));
         Optional.ofNullable(runtimeVersion).ifPresent(v -> requirements.put(RUNTIME_VERSION, v));
         Optional.ofNullable(vendor).ifPresent(v -> requirements.put(VENDOR, v));
+        Optional.ofNullable(env).ifPresent(v -> requirements.put(ENV, v));
 
         ToolchainModel currentJdkToolchainModel =
                 discoverer.getCurrentJdkToolchain().orElse(null);
         ToolchainPrivate currentJdkToolchain =
                 currentJdkToolchainModel != null ? factory.createToolchain(currentJdkToolchainModel) : null;
 
-        if (useJdk == JdkMode.IfMatch
-                && currentJdkToolchain != null
-                && currentJdkToolchain.matchesRequirements(requirements)) {
+        if (useJdk == JdkMode.IfMatch && currentJdkToolchain != null && matches(currentJdkToolchain, requirements)) {
             getLog().info("Not using an external toolchain as the current JDK matches the requirements.");
             return;
         }
 
         ToolchainPrivate toolchain = Stream.of(toolchainManager.getToolchainsForType(TOOLCHAIN_TYPE_JDK, session))
-                .filter(tc -> tc.matchesRequirements(requirements))
+                .filter(tc -> matches(tc, requirements))
                 .findFirst()
                 .orElse(null);
         if (toolchain != null) {
@@ -193,7 +203,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
 
             for (ToolchainModel tcm : persistedToolchains.getToolchains()) {
                 ToolchainPrivate tc = factory.createToolchain(tcm);
-                if (tc != null && tc.matchesRequirements(requirements)) {
+                if (tc != null && matches(tc, requirements)) {
                     toolchain = tc;
                     getLog().debug("Discovered matching JDK toolchain: " + toolchain);
                     break;
@@ -217,6 +227,35 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
 
         toolchainManager.storeToolchainToBuildContext(toolchain, session);
         getLog().info("Found matching JDK toolchain: " + toolchain);
+    }
+
+    private boolean matches(ToolchainPrivate tc, Map<String, String> requirements) {
+        ToolchainModel model = tc.getModel();
+        for (Map.Entry<String, String> req : requirements.entrySet()) {
+            String key = req.getKey();
+            String reqVal = req.getValue();
+            String tcVal = model.getProvides().getProperty(key);
+            if (tcVal == null) {
+                getLog().debug("Toolchain " + tc + " is missing required property: " + key);
+                return false;
+            }
+            if (!matches(key, reqVal, tcVal)) {
+                getLog().debug("Toolchain " + tc + " doesn't match required property: " + key);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean matches(String key, String reqVal, String tcVal) {
+        switch (key) {
+            case VERSION:
+                return RequirementMatcherFactory.createVersionMatcher(reqVal).matches(tcVal);
+            case ENV:
+                return reqVal.matches("(.*,|^)\\Q" + tcVal + "\\E(,.*|$)");
+            default:
+                return RequirementMatcherFactory.createExactMatcher(reqVal).matches(tcVal);
+        }
     }
 
     private String getJdkHome(ToolchainPrivate toolchain) {
