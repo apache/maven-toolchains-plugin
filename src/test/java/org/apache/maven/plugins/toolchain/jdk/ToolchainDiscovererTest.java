@@ -19,7 +19,12 @@
 package org.apache.maven.plugins.toolchain.jdk;
 
 import org.apache.maven.toolchain.model.PersistedToolchains;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,11 +32,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ToolchainDiscovererTest {
 
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Test
+    @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
     void testDiscovery() {
         ToolchainDiscoverer discoverer = new ToolchainDiscoverer();
         PersistedToolchains persistedToolchains = discoverer.discoverToolchains();
         assertNotNull(persistedToolchains);
+
+        persistedToolchains.getToolchains().forEach(model -> {
+            logger.info("  - "
+                    + ((Xpp3Dom) model.getConfiguration()).getChild("jdkHome").getValue());
+            logger.info("    provides:");
+            model.getProvides().forEach((k, v) -> logger.info("      " + k + ": " + v));
+        });
 
         assertTrue(persistedToolchains.getToolchains().stream()
                 .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));

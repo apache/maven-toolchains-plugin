@@ -239,7 +239,7 @@ public class ToolchainDiscoverer {
         return Paths.get(System.getProperty(USER_HOME)).resolve(DISCOVERED_TOOLCHAINS_CACHE_XML);
     }
 
-    private Path getJdkHome(ToolchainModel toolchain) {
+    public Path getJdkHome(ToolchainModel toolchain) {
         Xpp3Dom dom = (Xpp3Dom) toolchain.getConfiguration();
         Xpp3Dom javahome = dom != null ? dom.getChild(JDK_HOME) : null;
         String jdk = javahome != null ? javahome.getValue() : null;
