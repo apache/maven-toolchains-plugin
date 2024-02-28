@@ -18,11 +18,14 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import javax.inject.Inject;
+
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -33,10 +36,30 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 @Mojo(name = "display-discovered-jdk-toolchains", requiresProject = false)
 public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
 
+    /**
+     * Comparator used to sort JDK toolchains for selection.
+     * This property is a comma separated list of values which may contains:
+     * <ul>
+     * <li>{@code lts}: prefer JDK with LTS version</li>
+     * <li>{@code current}: prefer the current JDK</li>
+     * <li>{@code env}: prefer JDKs defined using {@code JAVA\{xx\}_HOME} environment variables</li>
+     * <li>{@code version}: prefer JDK with higher versions</li>
+     * <li>{@code vendor}: order JDK by vendor name (usually as a last comparator to ensure a stable order)</li>
+     * </ul>
+     */
+    @Parameter(property = "toolchain.jdk.comparator", defaultValue = "lts,current,env,version,vendor")
+    String comparator;
+
+    /**
+     * Toolchain discoverer
+     */
+    @Inject
+    ToolchainDiscoverer discoverer;
+
     @Override
     public void execute() throws MojoFailureException {
         try {
-            PersistedToolchains toolchains = new ToolchainDiscoverer(getLog()).discoverToolchains();
+            PersistedToolchains toolchains = discoverer.discoverToolchains(comparator);
             List<ToolchainModel> models = toolchains.getToolchains();
             getLog().info("Discovered " + models.size() + " JDK toolchains:");
             for (ToolchainModel model : models) {

@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import javax.inject.Inject;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -37,13 +39,23 @@ import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Writer;
 @Mojo(name = "generate-jdk-toolchains-xml", requiresProject = false)
 public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {
 
+    /**
+     * The path and name pf the toolchain XML file that will be generated.
+     * If not provided, the XML will be written to the standard output.
+     */
     @Parameter(property = "toolchain.file")
     String file;
+
+    /**
+     * Toolchain discoverer
+     */
+    @Inject
+    ToolchainDiscoverer discoverer;
 
     @Override
     public void execute() throws MojoFailureException {
         try {
-            PersistedToolchains toolchains = new ToolchainDiscoverer(getLog()).discoverToolchains();
+            PersistedToolchains toolchains = discoverer.discoverToolchains();
             if (file != null) {
                 Path file = Paths.get(this.file).toAbsolutePath();
                 Files.createDirectories(file.getParent());

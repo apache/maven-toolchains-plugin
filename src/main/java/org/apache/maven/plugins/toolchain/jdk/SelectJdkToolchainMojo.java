@@ -18,6 +18,9 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +30,6 @@ import java.util.stream.Stream;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -38,6 +40,11 @@ import org.apache.maven.toolchain.ToolchainPrivate;
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.RUNTIME_NAME;
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.RUNTIME_VERSION;
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VENDOR;
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VERSION;
 
 /**
  * Check that toolchains requirements are met by currently configured toolchains and
@@ -59,38 +66,85 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
     }
 
     /**
+     * The version constraint for the JDK toolchain to select.
      */
-    @Component
+    @Parameter(property = "toolchain.jdk.version")
+    private String version;
+
+    /**
+     * The runtime name constraint for the JDK toolchain to select.
+     */
+    @Parameter(property = "toolchain.jdk.runtime.name")
+    private String runtimeName;
+
+    /**
+     * The runtime version constraint for the JDK toolchain to select.
+     */
+    @Parameter(property = "toolchain.jdk.runtime.version")
+    private String runtimeVersion;
+
+    /**
+     * The vendor constraint for the JDK toolchain to select.
+     */
+    @Parameter(property = "toolchain.jdk.vendor")
+    private String vendor;
+
+    /**
+     * The matching mode, either {@code IfMatch} (the default), {@code IfSame}, or {@code Never}.
+     * If {@code IfMatch} is used, a toolchain will not be selected if the running JDK does
+     * match the provided constraints. This is the default and provides better performances as it
+     * avoids forking a different process when it's not required. The {@code IfSame} avoids
+     * selecting a toolchain if the toolchain selected is exactly the same as the running JDK.
+     * THe {@code Never} option will always select the toolchain.
+     */
+    @Parameter(property = "toolchain.jdk.mode", defaultValue = "IfMatch")
+    private JdkMode useJdk = JdkMode.IfMatch;
+
+    /**
+     * Automatically discover JDK toolchains using the built-in heuristic.
+     * The default value is {@code true}.
+     */
+    @Parameter(property = "toolchain.jdk.discover", defaultValue = "true")
+    private boolean discoverToolchains = true;
+
+    /**
+     * Comparator used to sort JDK toolchains for selection.
+     * This property is a comma separated list of values which may contains:
+     * <ul>
+     * <li>{@code lts}: prefer JDK with LTS version</li>
+     * <li>{@code current}: prefer the current JDK</li>
+     * <li>{@code env}: prefer JDKs defined using {@code JAVA\{xx\}_HOME} environment variables</li>
+     * <li>{@code version}: prefer JDK with higher versions</li>
+     * <li>{@code vendor}: order JDK by vendor name (usually as a last comparator to ensure a stable order)</li>
+     * </ul>
+     */
+    @Parameter(property = "toolchain.jdk.comparator", defaultValue = "lts,current,env,version,vendor")
+    private String comparator;
+
+    /**
+     * Toolchain manager
+     */
+    @Inject
     private ToolchainManagerPrivate toolchainManager;
 
     /**
+     * Toolchain factory
      */
-    @Component(hint = TOOLCHAIN_TYPE_JDK)
+    @Inject
+    @Named(TOOLCHAIN_TYPE_JDK)
     ToolchainFactory factory;
 
     /**
      * The current build session instance. This is used for toolchain manager API calls.
      */
-    @Component
+    @Inject
     private MavenSession session;
 
-    @Parameter(property = "toolchain.jdk.version")
-    private String version;
-
-    @Parameter(property = "toolchain.jdk.runtime.name")
-    private String runtimeName;
-
-    @Parameter(property = "toolchain.jdk.runtime.version")
-    private String runtimeVersion;
-
-    @Parameter(property = "toolchain.jdk.vendor")
-    private String vendor;
-
-    @Parameter(property = "toolchain.jdk.mode", defaultValue = "IfMatch")
-    private JdkMode useJdk = JdkMode.IfMatch;
-
-    @Parameter(property = "toolchain.jdk.discover", defaultValue = "true")
-    private boolean discoverToolchains = true;
+    /**
+     * Toolchain discoverer
+     */
+    @Inject
+    ToolchainDiscoverer discoverer;
 
     @Override
     public void execute() throws MojoFailureException {
@@ -106,16 +160,16 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
             return;
         }
 
-        ToolchainDiscoverer discoverer = new ToolchainDiscoverer(getLog());
-
         Map<String, String> requirements = new HashMap<>();
-        Optional.ofNullable(version).ifPresent(v -> requirements.put("version", v));
-        Optional.ofNullable(runtimeName).ifPresent(v -> requirements.put("runtime.name", v));
-        Optional.ofNullable(runtimeVersion).ifPresent(v -> requirements.put("runtime.version", v));
-        Optional.ofNullable(vendor).ifPresent(v -> requirements.put("vendor", v));
+        Optional.ofNullable(version).ifPresent(v -> requirements.put(VERSION, v));
+        Optional.ofNullable(runtimeName).ifPresent(v -> requirements.put(RUNTIME_NAME, v));
+        Optional.ofNullable(runtimeVersion).ifPresent(v -> requirements.put(RUNTIME_VERSION, v));
+        Optional.ofNullable(vendor).ifPresent(v -> requirements.put(VENDOR, v));
 
-        ToolchainModel currentJdkToolchainModel = discoverer.getCurrentJdkToolchain();
-        ToolchainPrivate currentJdkToolchain = factory.createToolchain(currentJdkToolchainModel);
+        ToolchainModel currentJdkToolchainModel =
+                discoverer.getCurrentJdkToolchain().orElse(null);
+        ToolchainPrivate currentJdkToolchain =
+                currentJdkToolchainModel != null ? factory.createToolchain(currentJdkToolchainModel) : null;
 
         if (useJdk == JdkMode.IfMatch
                 && currentJdkToolchain != null
@@ -130,10 +184,13 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
                 .orElse(null);
         if (toolchain != null) {
             getLog().info("Found matching JDK toolchain: " + toolchain);
-        } else {
+        }
+
+        if (toolchain == null && discoverToolchains) {
             getLog().debug("No matching toolchains configured, trying to discover JDK toolchains");
-            PersistedToolchains persistedToolchains = discoverer.discoverToolchains();
+            PersistedToolchains persistedToolchains = discoverer.discoverToolchains(comparator);
             getLog().info("Discovered " + persistedToolchains.getToolchains().size() + " JDK toolchains");
+
             for (ToolchainModel tcm : persistedToolchains.getToolchains()) {
                 ToolchainPrivate tc = factory.createToolchain(tcm);
                 if (tc != null && tc.matchesRequirements(requirements)) {
@@ -143,18 +200,21 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
                 }
             }
         }
+
         if (toolchain == null) {
             throw new MojoFailureException(
                     "Cannot find matching toolchain definitions for the following toolchain types:" + requirements
                             + System.lineSeparator()
                             + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file.");
         }
+
         if (useJdk == JdkMode.IfSame
                 && currentJdkToolchain != null
                 && Objects.equals(getJdkHome(currentJdkToolchain), getJdkHome(toolchain))) {
             getLog().info("Not using an external toolchain as the current JDK has been selected.");
             return;
         }
+
         toolchainManager.storeToolchainToBuildContext(toolchain, session);
         getLog().info("Found matching JDK toolchain: " + toolchain);
     }

@@ -18,6 +18,9 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -25,87 +28,129 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
 import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Reader;
 import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Writer;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.apache.maven.plugins.toolchain.jdk.SelectJdkToolchainMojo.TOOLCHAIN_TYPE_JDK;
 
 /**
  * Toolchain discoverer service
  */
+@Named
+@Singleton
 public class ToolchainDiscoverer {
 
-    private static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-toolchains-cache.xml";
+    public static final String JAVA = "java.";
+    public static final String VERSION = "version";
+    public static final String RUNTIME_NAME = "runtime.name";
+    public static final String RUNTIME_VERSION = "runtime.version";
+    public static final String VENDOR = "vendor";
+    public static final String VENDOR_VERSION = "vendor.version";
+    public static final String[] PROPERTIES = {VERSION, RUNTIME_NAME, RUNTIME_VERSION, VENDOR, VENDOR_VERSION};
 
-    private final Log log;
+    public static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-toolchains-cache.xml";
+
+    public static final String CURRENT = "current";
+    public static final String ENV = "env";
+    public static final String LTS = "lts";
+
+    public static final String JDK_HOME = "jdkHome";
+    public static final String JAVA_HOME = "java.home";
+
+    private static final String COMMA = ",";
+    public static final String USER_HOME = "user.home";
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private Map<Path, ToolchainModel> cache;
     private boolean cacheModified;
 
-    public ToolchainDiscoverer(Log log) {
-        this.log = log;
-    }
-
     /**
      * Build the model for the current JDK toolchain
      */
-    public ToolchainModel getCurrentJdkToolchain() {
-        Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty("java.home")));
-        if (!Files.exists(currentJdkHome.resolve("bin/javac"))
-                && !Files.exists(currentJdkHome.resolve("bin/javac.exe"))) {
+    public Optional<ToolchainModel> getCurrentJdkToolchain() {
+        Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty(JAVA_HOME)));
+        if (hasJavaC(currentJdkHome)) {
             // in case the current JVM is not a JDK
-            return null;
+            return Optional.empty();
         }
-
         ToolchainModel model = new ToolchainModel();
-        model.setType("jdk");
-        Stream.of("java.version", "java.runtime.name", "java.runtime.version", "java.vendor", "java.vendor.version")
-                .forEach(k -> {
-                    String v = System.getProperty(k);
-                    if (v != null) {
-                        model.addProvide(k.substring(5), v);
-                    }
-                });
-        model.addProvide("current", "true");
+        model.setType(TOOLCHAIN_TYPE_JDK);
+        Stream.of(PROPERTIES).forEach(k -> {
+            String v = System.getProperty(JAVA + k);
+            if (v != null) {
+                model.addProvide(k.substring(JAVA.length()), v);
+            }
+        });
+        model.addProvide(CURRENT, "true");
         Xpp3Dom config = new Xpp3Dom("configuration");
-        Xpp3Dom jdkHome = new Xpp3Dom("jdkHome");
+        Xpp3Dom jdkHome = new Xpp3Dom(JDK_HOME);
         jdkHome.setValue(currentJdkHome.toString());
         config.addChild(jdkHome);
         model.setConfiguration(config);
-        return model;
+        return Optional.of(model);
+    }
+
+    public PersistedToolchains discoverToolchains() {
+        return discoverToolchains(LTS + COMMA + VERSION + COMMA + VENDOR);
     }
 
     /**
      * Returns a PersistedToolchains object containing a list of discovered toolchains,
      * never <code>null</code>.
      */
-    public PersistedToolchains discoverToolchains() {
+    public PersistedToolchains discoverToolchains(String comparator) {
         try {
             Set<Path> jdks = findJdks();
             log.info("Found " + jdks.size() + " possible jdks: " + jdks);
             cacheModified = false;
             readCache();
-            Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty("java.home")));
+            Map<Path, Set<String>> flags = new HashMap<>();
+            Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty(JAVA_HOME)));
+            flags.computeIfAbsent(currentJdkHome, p -> new HashSet<>()).add(CURRENT);
+            // check environment variables for JAVA{xx}_HOME
+            System.getenv().entrySet().stream()
+                    .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
+                    .map(e -> Paths.get(e.getValue()))
+                    .map(ToolchainDiscoverer::getCanonicalPath)
+                    .forEach(path ->
+                            flags.computeIfAbsent(path, p -> new HashSet<>()).add(ENV));
+
             List<ToolchainModel> tcs = jdks.parallelStream()
-                    .map(s -> getToolchainModel(currentJdkHome, s))
-                    .filter(Objects::nonNull)
-                    .sorted(getToolchainModelComparator())
+                    .map(s -> {
+                        ToolchainModel tc = getToolchainModel(s);
+                        for (String flag : flags.getOrDefault(s, Collections.emptySet())) {
+                            tc.getProvides().setProperty(flag, "true");
+                        }
+                        String version = tc.getProvides().getProperty(VERSION);
+                        if (isLts(version)) {
+                            tc.getProvides().setProperty(LTS, "true");
+                        }
+                        return tc;
+                    })
+                    .sorted(getToolchainModelComparator(comparator))
                     .collect(Collectors.toList());
             if (this.cacheModified) {
                 writeCache();
@@ -123,6 +168,14 @@ public class ToolchainDiscoverer {
         }
     }
 
+    private static boolean isLts(String version) {
+        return version.startsWith("1.8.")
+                || version.startsWith("11.")
+                || version.startsWith("17.")
+                || version.startsWith("21.")
+                || version.startsWith("25.");
+    }
+
     private void readCache() {
         try {
             cache = new ConcurrentHashMap<>();
@@ -131,6 +184,16 @@ public class ToolchainDiscoverer {
                 try (Reader r = Files.newBufferedReader(cacheFile)) {
                     PersistedToolchains pt = new MavenToolchainsXpp3Reader().read(r, false);
                     cache = pt.getToolchains().stream()
+                            // Remove stale entries
+                            .filter(tc -> {
+                                // If the bin/java executable is not available anymore, remove this TC
+                                if (!hasJavaC(getJdkHome(tc))) {
+                                    cacheModified = false;
+                                    return false;
+                                } else {
+                                    return true;
+                                }
+                            })
                             .collect(Collectors.toConcurrentMap(this::getJdkHome, Function.identity()));
                 }
             }
@@ -145,13 +208,15 @@ public class ToolchainDiscoverer {
             Files.createDirectories(cacheFile.getParent());
             try (Writer w = Files.newBufferedWriter(cacheFile)) {
                 PersistedToolchains pt = new PersistedToolchains();
-                List<ToolchainModel> toolchains = new ArrayList<>();
-                for (ToolchainModel tc : cache.values()) {
-                    tc = tc.clone();
-                    tc.getProvides().remove("current");
-                    toolchains.add(tc);
-                }
-                pt.setToolchains(toolchains);
+                pt.setToolchains(cache.values().stream()
+                        .map(tc -> {
+                            ToolchainModel model = tc.clone();
+                            model.getProvides().remove(CURRENT);
+                            model.getProvides().remove(ENV);
+                            return model;
+                        })
+                        .sorted(version().thenComparing(vendor()))
+                        .collect(Collectors.toList()));
                 new MavenToolchainsXpp3Writer().write(w, pt);
             }
         } catch (IOException e) {
@@ -160,17 +225,17 @@ public class ToolchainDiscoverer {
     }
 
     private static Path getCacheFile() {
-        return Paths.get(System.getProperty("user.home")).resolve(DISCOVERED_TOOLCHAINS_CACHE_XML);
+        return Paths.get(System.getProperty(USER_HOME)).resolve(DISCOVERED_TOOLCHAINS_CACHE_XML);
     }
 
     private Path getJdkHome(ToolchainModel toolchain) {
         Xpp3Dom dom = (Xpp3Dom) toolchain.getConfiguration();
-        Xpp3Dom javahome = dom != null ? dom.getChild("jdkHome") : null;
+        Xpp3Dom javahome = dom != null ? dom.getChild(JDK_HOME) : null;
         String jdk = javahome != null ? javahome.getValue() : null;
         return Paths.get(Objects.requireNonNull(jdk));
     }
 
-    ToolchainModel getToolchainModel(Path currentJdkHome, Path jdk) {
+    ToolchainModel getToolchainModel(Path jdk) {
         log.debug("Computing model for " + jdk);
 
         ToolchainModel model = cache.get(jdk);
@@ -180,17 +245,13 @@ public class ToolchainDiscoverer {
             cacheModified = true;
         }
 
-        if (Objects.equals(jdk, currentJdkHome)) {
-            model.getProvides().setProperty("current", "true");
-        }
         return model;
     }
 
     ToolchainModel doGetToolchainModel(Path jdk) {
-        Path bin = jdk.resolve("bin");
-        Path java = bin.resolve("java");
+        Path java = jdk.resolve("bin/java");
         if (!java.toFile().canExecute()) {
-            java = bin.resolve("java.exe");
+            java = jdk.resolve("bin/java.exe");
             if (!java.toFile().canExecute()) {
                 log.debug("JDK toolchain discovered at " + jdk + " will be ignored: unable to find java executable");
                 return null;
@@ -215,23 +276,23 @@ public class ToolchainDiscoverer {
         }
 
         Map<String, String> properties = new LinkedHashMap<>();
-        for (String name : Arrays.asList("version", "runtime.name", "runtime.version", "vendor", "vendor.version")) {
+        Stream.of(PROPERTIES).forEach(name -> {
             lines.stream()
-                    .filter(l -> l.contains("java." + name))
+                    .filter(l -> l.contains(JAVA + name))
                     .map(l -> l.replaceFirst(".*=\\s*(.*)", "$1"))
                     .findFirst()
                     .ifPresent(value -> properties.put(name, value));
-        }
-        if (!properties.containsKey("version")) {
-            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: could not obtain java.version");
+        });
+        if (!properties.containsKey(VERSION)) {
+            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: could not obtain " + JAVA + VERSION);
             return null;
         }
 
         ToolchainModel model = new ToolchainModel();
-        model.setType("jdk");
+        model.setType(TOOLCHAIN_TYPE_JDK);
         properties.forEach(model::addProvide);
         Xpp3Dom configuration = new Xpp3Dom("configuration");
-        Xpp3Dom jdkHome = new Xpp3Dom("jdkHome");
+        Xpp3Dom jdkHome = new Xpp3Dom(JDK_HOME);
         jdkHome.setValue(jdk.toString());
         configuration.addChild(jdkHome);
         model.setConfiguration(configuration);
@@ -246,45 +307,82 @@ public class ToolchainDiscoverer {
         }
     }
 
-    Comparator<ToolchainModel> getToolchainModelComparator() {
-        return Comparator.comparing(
-                        (ToolchainModel tc) -> tc.getProvides().getProperty("version"), this::compareVersion)
-                .reversed()
-                .thenComparing(tc -> tc.getProvides().getProperty("vendor"));
-    }
-
-    int compareVersion(String v1, String v2) {
-        String[] s1 = v1.split("\\.");
-        String[] s2 = v2.split("\\.");
-        return compare(s1, s2);
-    }
-
-    static <T extends Comparable<? super T>> int compare(T[] a, T[] b) {
-        int length = Math.min(a.length, b.length);
-        for (int i = 0; i < length; i++) {
-            T oa = a[i];
-            T ob = b[i];
-            if (oa != ob) {
-                // A null element is less than a non-null element
-                if (oa == null || ob == null) {
-                    return oa == null ? -1 : 1;
-                }
-                int v = oa.compareTo(ob);
-                if (v != 0) {
-                    return v;
-                }
-            }
+    Comparator<ToolchainModel> getToolchainModelComparator(String comparator) {
+        Comparator<ToolchainModel> c = null;
+        for (String part : comparator.split(COMMA)) {
+            c = c == null ? getComparator(part) : c.thenComparing(getComparator(part));
         }
-        return a.length - b.length;
+        return c;
+    }
+
+    private Comparator<ToolchainModel> getComparator(String part) {
+        switch (part.trim().toLowerCase(Locale.ROOT)) {
+            case LTS:
+                return lts();
+            case VENDOR:
+                return vendor();
+            case ENV:
+                return env();
+            case CURRENT:
+                return current();
+            case VERSION:
+                return version();
+            default:
+                throw new IllegalArgumentException("Unsupported comparator: " + part
+                        + ". Supported comparators are: vendor, env, current, lts and version.");
+        }
+    }
+
+    Comparator<ToolchainModel> lts() {
+        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(LTS) ? -1 : +1);
+    }
+
+    Comparator<ToolchainModel> vendor() {
+        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VENDOR));
+    }
+
+    Comparator<ToolchainModel> env() {
+        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(ENV) ? -1 : +1);
+    }
+
+    Comparator<ToolchainModel> current() {
+        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().containsKey(CURRENT) ? -1 : +1);
+    }
+
+    Comparator<ToolchainModel> version() {
+        return Comparator.comparing((ToolchainModel tc) -> tc.getProvides().getProperty(VERSION), (v1, v2) -> {
+                    String[] a = v1.split("\\.");
+                    String[] b = v2.split("\\.");
+                    int length = Math.min(a.length, b.length);
+                    for (int i = 0; i < length; i++) {
+                        String oa = a[i];
+                        String ob = b[i];
+                        if (!Objects.equals(oa, ob)) {
+                            // A null element is less than a non-null element
+                            if (oa == null || ob == null) {
+                                return oa == null ? -1 : 1;
+                            }
+                            int v = oa.compareTo(ob);
+                            if (v != 0) {
+                                return v;
+                            }
+                        }
+                    }
+                    return a.length - b.length;
+                })
+                .reversed();
     }
 
     private Set<Path> findJdks() {
+        List<Path> dirsToTest = new ArrayList<>();
+        // add current JDK
+        dirsToTest.add(Paths.get(System.getProperty(JAVA_HOME)));
         // check environment variables for JAVA{xx}_HOME
-        List<Path> dirsToTest = System.getenv().entrySet().stream()
+        System.getenv().entrySet().stream()
                 .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
                 .map(e -> Paths.get(e.getValue()))
-                .collect(Collectors.toList());
-        final String userHome = System.getProperty("user.home");
+                .forEach(dirsToTest::add);
+        final String userHome = System.getProperty(USER_HOME);
         List<Path> installedDirs = new ArrayList<>();
         // jdk installed by third
         installedDirs.add(Paths.get(userHome, ".jdks"));
