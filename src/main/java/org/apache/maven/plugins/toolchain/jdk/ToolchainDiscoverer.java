@@ -247,12 +247,18 @@ public class ToolchainDiscoverer {
 
     ToolchainModel doGetToolchainModel(Path jdk) {
         Path java = jdk.resolve("bin/java");
-        if (!java.toFile().canExecute()) {
-            java = jdk.resolve("bin/java.exe");
-            if (!java.toFile().canExecute()) {
-                log.debug("JDK toolchain discovered at " + jdk + " will be ignored: unable to find java executable");
+        if (!Files.exists(java)) {
+            java = jdk.resolve("bin\\java.exe");
+            if (!Files.exists(java)) {
+                log.debug("JDK toolchain discovered at " + jdk
+                        + " will be ignored: unable to find bin/java or bin\\java.exe");
                 return null;
             }
+        }
+        if (!java.toFile().canExecute()) {
+            log.debug("JDK toolchain discovered at " + jdk
+                    + " will be ignored: the bin/java or bin\\java.exe is not executable");
+            return null;
         }
         List<String> lines;
         try {
@@ -268,7 +274,7 @@ public class ToolchainDiscoverer {
                 Files.delete(temp);
             }
         } catch (IOException | InterruptedException e) {
-            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: unable to execute java: " + e);
+            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
             return null;
         }
 
