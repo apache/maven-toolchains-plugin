@@ -38,7 +38,7 @@ Custom Toolchains
 
   Following instructions are explanations of key points of the sample.
 
-* Creating Custom Toolchain
+* Creating a Custom Toolchain
 
   A toolchain consists in:
 
@@ -67,7 +67,7 @@ Custom Toolchains
     @Component
     private ToolchainManager toolchainManager;
 
-    @Parameter( defaultValue = "${session}", required = true, readonly = true )
+    @Component
     private MavenSession session;
 
     public void execute()
