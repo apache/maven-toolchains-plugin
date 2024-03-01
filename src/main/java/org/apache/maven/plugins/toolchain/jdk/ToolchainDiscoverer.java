@@ -411,6 +411,14 @@ public class ToolchainDiscoverer {
             installedDirs.add(Paths.get(userHome, "Library/Java/JavaVirtualMachines"));
         } else if (win) {
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
+            Path scoop = Paths.get(userHome, "scoop/apps");
+            if (Files.isDirectory(scoop)) {
+                try (Stream<Path> stream = Files.list(scoop)) {
+                    stream.forEach(dirsToTest::add);
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         } else {
             installedDirs.add(Paths.get("/usr/jdk"));
             installedDirs.add(Paths.get("/usr/java"));
