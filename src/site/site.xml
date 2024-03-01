@@ -25,15 +25,16 @@ under the License.
   <body>
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
-      <item name="Goals" href="plugin-info.html"/>
-      <item name="Usage" href="usage.html"/>
+      <item name="Goals" href="plugin-info.html">
+        <item name="toolchains:toolchain" href="toolchain-mojo.html"/>
+      </item>
+      <item name="Usage" href="usage.html">
+        <item name="Standard Toolchains" href="toolchains/index.html"/>
+        <item name="JDK Standard Toolchain" href="toolchains/jdk.html"/>
+        <item name="Custom Toolchains" href="toolchains/custom.html"/>
+      </item>
       <item name="License" href="https://www.apache.org/licenses/"/>
       <item name="Download" href="download.html"/>
-    </menu>
-    <menu name="Toolchains">
-      <item name="Standard Toolchains" href="toolchains/index.html"/>
-      <item name="JDK Standard Toolchain" href="toolchains/jdk.html"/>
-      <item name="Custom Toolchains" href="toolchains/custom.html"/>
     </menu>
   </body>
 </project>
