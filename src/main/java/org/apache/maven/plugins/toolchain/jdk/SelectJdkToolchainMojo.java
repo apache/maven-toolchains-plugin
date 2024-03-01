@@ -198,7 +198,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
         if (toolchain == null && discoverToolchains) {
             getLog().debug("No matching toolchains configured, trying to discover JDK toolchains");
             PersistedToolchains persistedToolchains = discoverer.discoverToolchains(comparator);
-            getLog().info("Discovered " + persistedToolchains.getToolchains().size() + " JDK toolchains");
+            getLog().debug("Discovered " + persistedToolchains.getToolchains().size() + " JDK toolchains");
 
             for (ToolchainModel tcm : persistedToolchains.getToolchains()) {
                 ToolchainPrivate tc = factory.createToolchain(tcm);
@@ -214,18 +214,18 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
             throw new MojoFailureException(
                     "Cannot find matching toolchain definitions for the following toolchain types:" + requirements
                             + System.lineSeparator()
-                            + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file.");
+                            + "Define the required toolchains in your ~/.m2/toolchains.xml file.");
         }
 
         if (useJdk == JdkMode.IfSame
                 && currentJdkToolchain != null
                 && Objects.equals(getJdkHome(currentJdkToolchain), getJdkHome(toolchain))) {
-            getLog().info("Not using an external toolchain as the current JDK has been selected.");
+            getLog().debug("Not using an external toolchain as the current JDK has been selected.");
             return;
         }
 
         toolchainManager.storeToolchainToBuildContext(toolchain, session);
-        getLog().info("Found matching JDK toolchain: " + toolchain);
+        getLog().debug("Found matching JDK toolchain: " + toolchain);
     }
 
     private boolean matches(ToolchainPrivate tc, Map<String, String> requirements) {

@@ -47,10 +47,10 @@ JDK Toolchain discovery mechanism
 ...
 +---+
 
-  If you have installed JDK using standard tools and they are not listed here, feel free
-  to {{{../issue-management.html}raise an issue}}.
+  If you have installed JDKs using known installers and they are not found by the plugin,
+  feel free to {{{../issue-management.html}raise an issue}}.
 
-  The discovery mechanism provides a few information for each discovered JDK:
+  The discovery mechanism provides information for each discovered JDK:
 
    * <<<version>>>: the JDK version
 
@@ -69,10 +69,9 @@ JDK Toolchain discovery mechanism
    * <<<env>>>: set to the comma separated list of <<<JAVA\{xyz\}_HOME>>>> matching environment variables
 
 
-  The <<<select-jdk-toolchain>>> goal discovering and selecting a matching JDK.
+  The <<<select-jdk-toolchain>>> goal finds a matching JDK.
   The config below allows using the current JDK, or any other discovered JDK >= 17.
-  The benefit is that the current JDK can be kept for speed, but ensuring the usage of any JDK 17 or higher if
-  the current jdk is below the requirements.
+  The current JDK can be kept for speed, but JDK 17 or higher will be used if the current JDK is older than 17.
 
 +---+
 <properties>
@@ -104,7 +103,7 @@ JDK Toolchain discovery mechanism
 
 * Selection mechanism
 
-  Several properties can be used to express requirements to match against discovered JDK toolchains:
+  Several properties can express requirements to match against discovered JDK toolchains:
 
    * <<<version>>> / <<<toolchain.jdk.version>>>: a version range such as <<<[17,18)>>> to match against the JDK version
 
@@ -120,9 +119,9 @@ JDK Toolchain discovery mechanism
 
 * Sorting
 
-  Multiple discovered JDK toolchains may match the above requirements.  In such a case, you may want to express
-  preferences to use to sort the toolchains.  This can be done using the <<<comparator>>> configuration which is a
-  comma separated list of criterions amongst the following:
+  Multiple discovered JDK toolchains may satisfy the requirements.  In such a case, you can express
+  preferences for sorting the toolchains.  This can be done using the <<<comparator>>> configuration which is a
+  comma separated list of criteria amongst the following:
 
    * <<<lts>>>: prefer LTS toolchains
 
@@ -140,9 +139,9 @@ JDK Toolchain discovery mechanism
 
   The generation of the <<<toolchains.xml>>> file is not necessary to use discovered toolchains.
   The <<<select-jdk-toolchain>>> will select a toolchain amongst explicitly configured toolchains and discovered
-  toolchains. The information for discovered toolchains are cached in <<<~/.m2/discovered-toolchains-cache.xml>>> file
-  by default, to speed up things.
+  toolchains. Discovered toolchains are cached in <<<~/.m2/discovered-toolchains-cache.xml>>> file
+  by default, to speed up builds.
 
   If you prefer, you can use the <<<generate-jdk-toolchains-xml>>> to generate a toolchain XML.  This can be used in
-  conjunction to the <<<discoverToolchains=false>>> configuration to disable the discovery and only use explicitly
+  conjunction with the <<<discoverToolchains=false>>> configuration to disable discovery and only use explicitly
   configured toolchains.
