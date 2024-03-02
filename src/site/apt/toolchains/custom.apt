@@ -25,14 +25,14 @@
 
 Custom Toolchains
 
-  You can create your own custom toolchains with plugins using them.
+  You can create your own custom toolchains for plugins to use.
 
-  A full working sample is included in <<<maven-toolchains-plugin>>> ITs, which are part of 
+  A full working sample is included in the <<<maven-toolchains-plugin>>> integration tests, which are part of 
   {{{../source-repository.html}the plugin source tree}}:
 
-  * see <<<src/it/setup-custom-toolchain>>> for the custom toolchain and plugin,
+  * See <<<src/it/setup-custom-toolchain>>> for the custom toolchain and plugin,
 
-  * see <<<src/it/use-custom-toolchain>>> for a sample project using the toolchain through its plugin.
+  * See <<<src/it/use-custom-toolchain>>> for a sample project using the toolchain through its plugin.
 
   []
 
@@ -40,7 +40,7 @@ Custom Toolchains
 
 * Creating a Custom Toolchain
 
-  A toolchain consists in:
+  A toolchain consists of:
 
   * an interface extending {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/Toolchain.html}<<<org.apache.maven.toolchain.Toolchain>>>}},
 
@@ -59,9 +59,9 @@ Custom Toolchains
 
 * Creating a Plugin Using a Toolchain
 
-  To get a configured toolchain, a plugin uses
+  To find a tool, a plugin uses
   {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/ToolchainManager.html}<<<ToolchainManager>>>}} API
-  to get expected toolchain, then some tool in the toolchain:
+  to load the toolchain, then uses that toolchain object to find the tool's path:
 
 +--------+
     @Component
@@ -90,14 +90,14 @@ Custom Toolchains
     }
 +--------+
 
-  This code uses {{{/plugin-tools/maven-plugin-plugin/examples/using-annotations.html}Maven Plugin Tool Java 5 Annotations}}.
+  This code uses {{{/plugin-tools/maven-plugin-plugin/examples/using-annotations.html}Maven Plugin Tool Annotations}}.
 
 * Using the Custom Toolchain and its Plugin
 
-  The custom toolchain implementation needs to be shared between the toolchain-aware plugin and <<<maven-toolchains-plugin>>>:
-  this is done using Maven extension:
+  The custom toolchain implementation needs to be shared between the toolchain-aware plugin and <<<maven-toolchains-plugin>>>.
+  This is done using Maven extension:
 
-  * if the toolchain is packaged with the plugin, this is done by declaring the plugin as extension:
+  * if the toolchain is packaged with the plugin, this is done by declaring the plugin as an extension:
 
 +--------+
       <plugin>
@@ -126,6 +126,6 @@ Custom Toolchains
 
   []
 
-  Notice that packaging a toolchain in its own artifact separate from plugin is only useful when there are multiple plugins
-  using the toolchain. As it is expected in general that a custom toolchain will be used by only one plugin
-  (eventually providing multiple goals), it is simpler to package the toolchain with the plugin in only one artifact.
+  Packaging a toolchain in its own artifact separate from the plugin is only useful when there are multiple plugins
+  using the toolchain. If a custom toolchain will only be used by one plugin
+  (eventually providing multiple goals), it is simpler to package the toolchain with the plugin in a single artifact.
