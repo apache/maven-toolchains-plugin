@@ -19,9 +19,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<project xmlns="http://maven.apache.org/DECORATION/1.4.0"
+<project xmlns="http://maven.apache.org/DECORATION/1.8.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0 https://maven.apache.org/xsd/decoration-1.4.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.1 https://maven.apache.org/xsd/decoration-1.8.1.xsd">
   <body>
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
@@ -35,6 +35,10 @@ under the License.
       </item>
       <item name="License" href="https://www.apache.org/licenses/"/>
       <item name="Download" href="download.html"/>
+    </menu>
+    <menu name="See Also">
+      <item name="Guide to Using Toolchains" href="/guides/mini/guide-using-toolchains.html"/>
+      <item name="Toolchains Descriptor" href="/ref/current/maven-core/toolchains.html"/>
     </menu>
   </body>
 </project>
