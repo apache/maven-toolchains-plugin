@@ -21,12 +21,12 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.maven.plugins.toolchains.its</groupId>
-  <artifactId>missing-toolchain</artifactId>
+  <artifactId>select-missing-jdk-toolchain</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>maven-toolchains-plugin IT: missing toolchain test</name>
-  <description>Check that toolchain requirements are checked and not covered as expected</description>
+  <name>maven-toolchains-plugin IT: select missing jdk toolchain test</name>
+  <description>Check behaviour when missing jdk toolchain selected</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,11 +43,6 @@ under the License.
             <jdk>
               <version>17</version>
             </jdk>
-            <fake-type>
-              <attribute>value</attribute>
-              <other-attribute>other-value</other-attribute>
-            </fake-type>
-            <another-fake-type />
           </toolchains>
         </configuration>
         <executions>
