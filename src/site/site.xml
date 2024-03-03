@@ -27,6 +27,7 @@ under the License.
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html">
         <item name="toolchains:toolchain" href="toolchain-mojo.html"/>
+        <item name="toolchains:help" href="help-mojo.html"/>
       </item>
       <item name="Usage" href="usage.html">
         <item name="Standard Toolchains" href="toolchains/index.html"/>

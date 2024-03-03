@@ -88,6 +88,24 @@ Usage
 
   You can read more about which standard toolchains are available {{{./toolchains/index.html}here}}.
 
+  When executing, output will show toolchain(s) selection, for example:
+
+-------
+[INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
+[INFO] Required toolchain: jdk [ version='11' ]
+[INFO] Found matching toolchain for type jdk: JDK[/opt/jdk-11]
+-------
+
+  or fail if no toolchain was found matching expected requirements:
+
+-------
+[INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
+[INFO] Required toolchain: jdk [ version='17' ]
+[ERROR] No toolchain matched from 2 found for type jdk
+[ERROR] Cannot find matching toolchain definitions for the following toolchain types:
+jdk [ version='17' ]
+-------
+
 * The <<<toolchains.xml>>> Descriptor
 
   Toolchains available on the building machine are described in <<<~/.m2/toolchains.xml>>>:

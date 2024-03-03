@@ -120,6 +120,6 @@ JDK Toolchain
   for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care
   what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured
   by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project,
-  or JDK 21 from Oracle. It might not even exist.
+  or JDK 21 from Oracle. JDK toolchain only checks that directory exists.
 
   All conditions need to be satisfied to find a toolchain.
