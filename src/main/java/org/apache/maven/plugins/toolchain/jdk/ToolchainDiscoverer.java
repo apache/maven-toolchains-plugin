@@ -411,10 +411,12 @@ public class ToolchainDiscoverer {
             installedDirs.add(Paths.get(userHome, "Library/Java/JavaVirtualMachines"));
         } else if (win) {
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
-            Path scoop = Paths.get(userHome, "scoop/apps");
+            Path scoop = Paths.get(userHome, "scoop", "apps");
             if (Files.isDirectory(scoop)) {
                 try (Stream<Path> stream = Files.list(scoop)) {
-                    stream.forEach(dirsToTest::add);
+                    // Scoop can install multiple versions of a Java distribution, we only take the one that is
+                    // currently selected.
+                    stream.map(path -> Paths.get(path.toString(), "current")).forEach(dirsToTest::add);
                 } catch (IOException e) {
                     // ignore
                 }
