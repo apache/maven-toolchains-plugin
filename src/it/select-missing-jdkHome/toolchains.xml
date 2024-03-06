@@ -22,37 +22,6 @@ under the License.
 <toolchains xmlns="http://maven.apache.org/TOOLCHAINS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/TOOLCHAINS/1.0.0 http://maven.apache.org/xsd/toolchains-1.0.0.xsd">
   <toolchain>
-    <type>custom</type>
-    <provides>
-      <version>1.5</version>
-      <name>demo</name>
-    </provides>
-    <configuration>
-      <toolHome>opt/custom/1.5</toolHome>
-    </configuration>
-  </toolchain>
-  <toolchain>
-    <type>custom</type>
-    <provides>
-      <version>2.0</version>
-      <name>demo-2</name>
-    </provides>
-    <configuration>
-      <toolHome>opt/custom/2.0</toolHome>
-    </configuration>
-  </toolchain>
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <version>11</version>
-      <vendor>temurin</vendor>
-      <purpose>for_mevenide</purpose>
-    </provides>
-    <configuration>
-      <jdkHome>../select-jdk-toolchain</jdkHome>
-    </configuration>
-  </toolchain>
-  <toolchain>
     <type>jdk</type>
     <provides>
       <version>11</version>
@@ -60,7 +29,7 @@ under the License.
       <purpose>test</purpose>
     </provides>
     <configuration>
-      <jdkHome>../select-missing-jdk-toolchain</jdkHome>
+      <jdkHome>non/existing/jdkHome/directory</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>

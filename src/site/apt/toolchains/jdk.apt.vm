@@ -27,21 +27,19 @@ JDK Toolchain
 
 Note that this page refers to hand-written JDK toolchains.  For a simpler setup, look at the {{{./discovery.html}discovery mechanism}}.
 
-* Toolchain Identification
+* Toolchain Description
 
   The toolchain type id for JDK is "<<<jdk>>>".
  
-  Predefined identification tokens, for requirement matching, are:
+  Predefined <<<\<provides\>>>> identification tokens, for requirement matching in plugin configuration, are:
 
-  * "<<<version>>>" marks the version of the JDK. This can be either a single version or a version range.
+    * "<<<version>>>" marks the version of the JDK in <<<toolchain.xml>>>. In plugin's selection, this can be either a single version or a version range.
 
-  * Other tokens are accepted, but only exact matches are supported.
+    * Other tokens are accepted, but only exact matches are supported.
 
-  []
+    []
 
-* Toolchain Configuration
-
-  There is only one configuration element named "<<<jdkHome>>>". It designates the root directory
+  There is only one <<<toolchains.xml>>> <<<\<configuration\>>>> element named "<<<jdkHome>>>". It designates the root directory
   of a JDK installation.
 
 * Sample <<<toolchains.xml>>> setup
@@ -63,16 +61,16 @@ Note that this page refers to hand-written JDK toolchains.  For a simpler setup,
 </toolchains>
 +---+
 
-This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
-A project can request this toolchain by specifying the type "jdk" and the version "11".
-It can also use a version range that includes 11 like [8, 17]. It can also ask for the
-vendor temurin, with or without version, or the purpose "for_mevenide". 
+  This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
+
+  A project can request this toolchain by specifying the type "jdk" and the version "11".
+  It can also use a version range that includes 11 like <<<[8, 17]>>>. It can also ask for the
+  vendor temurin, with or without version, or the purpose "for_mevenide".
 
 
 * Toolchains Plugin Configuration
 
-
-A project specifies a toolchain in the configuraiton of the maven-toolchains-plugin like so: 
+  A project specifies a toolchain in the configuration of the maven-toolchains-plugin like so:
 
 +---+
 <project>
@@ -104,9 +102,9 @@ A project specifies a toolchain in the configuraiton of the maven-toolchains-plu
 </project>
 +---+
 
-In this example, the project is requesting any toolchain with type jdk that has a version of 1.8 or greater. 
- "<<<version>>>" accepts any {{{/enforcer/enforcer-rules/versionRanges.html}version range definitions}}.
-If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configured like this:
+  In this example, the project is requesting any toolchain with type jdk that has a version of 1.8 or greater.
+  "<<<version>>>" accepts any {{{/enforcer/enforcer-rules/versionRanges.html}version range definitions}}.
+  If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configured like this:
 
 +---+
         <configuration>
@@ -119,12 +117,10 @@ If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configu
         </configuration>
 +---+
 
-Aside from version, the definitions are opaque strings. Maven looks in toolchains.xml
-for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care
-what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured 
-by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project,
-or JDK 21 from Oracle. It might not even exist.
+  Aside from version, the definitions are opaque strings. Maven looks in <<<toolchains.xml>>>
+  for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care
+  what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured
+  by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project,
+  or JDK 21 from Oracle. JDK toolchain only checks that directory exists.
 
-
-All conditions need to be satisfied to find a toolchain.
-
+  All conditions need to be satisfied to find a toolchain.
