@@ -252,9 +252,9 @@ public class ToolchainDiscoverer {
     }
 
     ToolchainModel doGetToolchainModel(Path jdk) {
-        Path java = jdk.resolve("bin/java");
+        Path java = jdk.resolve("bin").resolve("java");
         if (!Files.exists(java)) {
-            java = jdk.resolve("bin\\java.exe");
+            java = jdk.resolve("bin").resolve("java.exe");
             if (!Files.exists(java)) {
                 log.debug("JDK toolchain discovered at " + jdk
                         + " will be ignored: unable to find bin/java or bin\\java.exe");
@@ -391,27 +391,27 @@ public class ToolchainDiscoverer {
                 .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
                 .map(e -> Paths.get(e.getValue()))
                 .forEach(dirsToTest::add);
-        final String userHome = System.getProperty(USER_HOME);
+        final Path userHome = Paths.get(System.getProperty(USER_HOME));
         List<Path> installedDirs = new ArrayList<>();
         // jdk installed by third
-        installedDirs.add(Paths.get(userHome, ".jdks"));
-        installedDirs.add(Paths.get(userHome, ".m2/jdks"));
-        installedDirs.add(Paths.get(userHome, ".sdkman/candidates/java"));
-        installedDirs.add(Paths.get(userHome, ".gradle/jdks"));
-        installedDirs.add(Paths.get(userHome, ".jenv/versions"));
-        installedDirs.add(Paths.get(userHome, ".jbang/cache/jdks"));
-        installedDirs.add(Paths.get(userHome, ".asdf/installs"));
-        installedDirs.add(Paths.get(userHome, ".jabba/jdk"));
+        installedDirs.add(userHome.resolve(".jdks"));
+        installedDirs.add(userHome.resolve(".m2").resolve("jdks"));
+        installedDirs.add(userHome.resolve(".sdkman").resolve("candidates").resolve("java"));
+        installedDirs.add(userHome.resolve(".gradle").resolve("jdks"));
+        installedDirs.add(userHome.resolve(".jenv").resolve("versions"));
+        installedDirs.add(userHome.resolve(".jbang").resolve("cache").resolve("jdks"));
+        installedDirs.add(userHome.resolve(".asdf").resolve("installs"));
+        installedDirs.add(userHome.resolve(".jabba").resolve("jdk"));
         // os related directories
         String osname = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         boolean macos = osname.startsWith("mac");
         boolean win = osname.startsWith("win");
         if (macos) {
             installedDirs.add(Paths.get("/Library/Java/JavaVirtualMachines"));
-            installedDirs.add(Paths.get(userHome, "Library/Java/JavaVirtualMachines"));
+            installedDirs.add(userHome.resolve("Library/Java/JavaVirtualMachines"));
         } else if (win) {
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
-            Path scoop = Paths.get(userHome, "scoop", "apps");
+            Path scoop = userHome.resolve("scoop").resolve("apps");
             if (Files.isDirectory(scoop)) {
                 try (Stream<Path> stream = Files.list(scoop)) {
                     // Scoop can install multiple versions of a Java distribution, we only take the one that is
@@ -432,7 +432,9 @@ public class ToolchainDiscoverer {
                 try (Stream<Path> stream = Files.list(dest)) {
                     stream.forEach(dir -> {
                         dirsToTest.add(dir);
-                        dirsToTest.add(dir.resolve("Contents/Home"));
+                        if (macos) {
+                            dirsToTest.add(dir.resolve("Contents").resolve("Home"));
+                        }
                     });
                 } catch (IOException e) {
                     // ignore
@@ -447,6 +449,7 @@ public class ToolchainDiscoverer {
     }
 
     private static boolean hasJavaC(Path subdir) {
-        return Files.exists(subdir.resolve("bin/javac")) || Files.exists(subdir.resolve("bin/javac.exe"));
+        return Files.exists(subdir.resolve(Paths.get("bin", "javac")))
+                || Files.exists(subdir.resolve(Paths.get("bin" , "javac.exe")));
     }
 }
