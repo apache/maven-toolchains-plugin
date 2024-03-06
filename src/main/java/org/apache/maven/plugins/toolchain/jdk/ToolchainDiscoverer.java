@@ -414,9 +414,7 @@ public class ToolchainDiscoverer {
             Path scoop = userHome.resolve("scoop").resolve("apps");
             if (Files.isDirectory(scoop)) {
                 try (Stream<Path> stream = Files.list(scoop)) {
-                    // Scoop can install multiple versions of a Java distribution, we only take the one that is
-                    // currently selected.
-                    stream.map(path -> Paths.get(path.toString(), "current")).forEach(dirsToTest::add);
+                    stream.forEach(installedDirs::add);
                 } catch (IOException e) {
                     // ignore
                 }
