@@ -463,6 +463,6 @@ public class ToolchainDiscoverer {
 
     private static boolean hasJavaC(Path subdir) {
         return Files.exists(subdir.resolve(Paths.get("bin", "javac")))
-                || Files.exists(subdir.resolve(Paths.get("bin" , "javac.exe")));
+                || Files.exists(subdir.resolve(Paths.get("bin", "javac.exe")));
     }
 }
