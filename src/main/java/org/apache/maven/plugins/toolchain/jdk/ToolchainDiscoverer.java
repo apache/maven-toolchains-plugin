@@ -88,8 +88,9 @@ public class ToolchainDiscoverer {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private Map<Path, ToolchainModel> cache;
-    private boolean cacheModified;
+    private volatile Map<Path, ToolchainModel> cache;
+    private volatile boolean cacheModified;
+    private volatile Set<Path> foundJdks;
 
     /**
      * Build the model for the current JDK toolchain
@@ -178,36 +179,38 @@ public class ToolchainDiscoverer {
                 || version.startsWith("25.");
     }
 
-    private void readCache() {
-        try {
-            cache = new ConcurrentHashMap<>();
-            cacheModified = false;
-            Path cacheFile = getCacheFile();
-            if (Files.isRegularFile(cacheFile)) {
-                try (Reader r = Files.newBufferedReader(cacheFile)) {
-                    PersistedToolchains pt = new MavenToolchainsXpp3Reader().read(r, false);
-                    cache = pt.getToolchains().stream()
-                            // Remove stale entries
-                            .filter(tc -> {
-                                // If the bin/java executable is not available anymore, remove this TC
-                                if (!hasJavaC(getJdkHome(tc))) {
-                                    cacheModified = true;
-                                    return false;
-                                } else {
-                                    return true;
-                                }
-                            })
-                            .collect(Collectors.toConcurrentMap(this::getJdkHome, Function.identity()));
+    private synchronized void readCache() {
+        if (cache == null) {
+            try {
+                cache = new ConcurrentHashMap<>();
+                cacheModified = false;
+                Path cacheFile = getCacheFile();
+                if (Files.isRegularFile(cacheFile)) {
+                    try (Reader r = Files.newBufferedReader(cacheFile)) {
+                        PersistedToolchains pt = new MavenToolchainsXpp3Reader().read(r, false);
+                        cache = pt.getToolchains().stream()
+                                // Remove stale entries
+                                .filter(tc -> {
+                                    // If the bin/java executable is not available anymore, remove this TC
+                                    if (!hasJavaC(getJdkHome(tc))) {
+                                        cacheModified = true;
+                                        return false;
+                                    } else {
+                                        return true;
+                                    }
+                                })
+                                .collect(Collectors.toConcurrentMap(this::getJdkHome, Function.identity()));
+                    }
                 }
+            } catch (IOException | XmlPullParserException e) {
+                log.debug("Error reading toolchains cache: " + e, e);
             }
-        } catch (IOException | XmlPullParserException e) {
-            log.debug("Error reading toolchains cache: " + e, e);
         }
     }
 
-    private void writeCache() {
-        try {
-            if (cacheModified) {
+    private synchronized void writeCache() {
+        if (cacheModified) {
+            try {
                 Path cacheFile = getCacheFile();
                 Files.createDirectories(cacheFile.getParent());
                 try (Writer w = Files.newBufferedWriter(cacheFile)) {
@@ -224,9 +227,10 @@ public class ToolchainDiscoverer {
                             .collect(Collectors.toList()));
                     new MavenToolchainsXpp3Writer().write(w, pt);
                 }
+            } catch (IOException e) {
+                log.debug("Error writing toolchains cache: " + e, e);
             }
-        } catch (IOException e) {
-            log.debug("Error writing toolchains cache: " + e, e);
+            cacheModified = false;
         }
     }
 
@@ -383,6 +387,17 @@ public class ToolchainDiscoverer {
     }
 
     private Set<Path> findJdks() {
+        if (foundJdks == null) {
+            synchronized (this) {
+                if (foundJdks == null) {
+                    foundJdks = doFindJdks();
+                }
+            }
+        }
+        return foundJdks;
+    }
+
+    private Set<Path> doFindJdks() {
         List<Path> dirsToTest = new ArrayList<>();
         // add current JDK
         dirsToTest.add(Paths.get(System.getProperty(JAVA_HOME)));
