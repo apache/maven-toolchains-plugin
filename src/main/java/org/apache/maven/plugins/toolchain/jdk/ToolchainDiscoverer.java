@@ -97,7 +97,7 @@ public class ToolchainDiscoverer {
      */
     public Optional<ToolchainModel> getCurrentJdkToolchain() {
         Path currentJdkHome = getCanonicalPath(Paths.get(System.getProperty(JAVA_HOME)));
-        if (hasJavaC(currentJdkHome)) {
+        if (!hasJavaC(currentJdkHome)) {
             // in case the current JVM is not a JDK
             return Optional.empty();
         }
@@ -106,7 +106,7 @@ public class ToolchainDiscoverer {
         Stream.of(PROPERTIES).forEach(k -> {
             String v = System.getProperty(JAVA + k);
             if (v != null) {
-                model.addProvide(k.substring(JAVA.length()), v);
+                model.addProvide(k, v);
             }
         });
         model.addProvide(CURRENT, "true");
