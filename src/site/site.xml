@@ -26,10 +26,14 @@ under the License.
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html">
+        <item name="toolchains:select-jdk-toolchain" href="select-jdk-toolchain-mojo.html"/>
         <item name="toolchains:toolchain" href="toolchain-mojo.html"/>
+        <item name="toolchains:display-discovered-jdk-toolchains-xml" href="display-discovered-jdk-toolchains-xml-mojo.html"/>
+        <item name="toolchains:generate-jdk-toolchains-xml" href="generate-jdk-toolchains-xml-mojo.html"/>
         <item name="toolchains:help" href="help-mojo.html"/>
       </item>
       <item name="Usage" href="usage.html">
+        <item name="Discovery mechanism" href="toolchains/discovery.html"/>
         <item name="Standard Toolchains" href="toolchains/index.html"/>
         <item name="JDK Standard Toolchain" href="toolchains/jdk.html"/>
         <item name="Custom Toolchains" href="toolchains/custom.html"/>
