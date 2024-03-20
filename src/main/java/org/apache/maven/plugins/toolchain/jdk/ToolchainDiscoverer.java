@@ -172,11 +172,8 @@ public class ToolchainDiscoverer {
     }
 
     private static boolean isLts(String version) {
-        return version.startsWith("1.8.")
-                || version.startsWith("11.")
-                || version.startsWith("17.")
-                || version.startsWith("21.")
-                || version.startsWith("25.");
+        return Stream.of("1.8", "8", "11", "17", "21", "25")
+                .anyMatch(v -> version.equals(v) || version.startsWith(v + "."));
     }
 
     private synchronized void readCache() {
