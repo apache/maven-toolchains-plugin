@@ -25,7 +25,7 @@
 
 Custom Toolchains
 
-  You can create your own custom toolchains for plugins to use.
+  You can create custom toolchains to use with standard plugins (such as the maven-compiler-plugin) or with custom plugins.
 
   A full working sample is included in the <<<maven-toolchains-plugin>>> integration tests, which are part of 
   {{{../source-repository.html}the plugin source tree}}:
