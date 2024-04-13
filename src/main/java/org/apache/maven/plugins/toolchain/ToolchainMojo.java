@@ -35,8 +35,8 @@ import org.apache.maven.toolchain.ToolchainManagerPrivate;
 import org.apache.maven.toolchain.ToolchainPrivate;
 
 /**
- * Check that toolchains requirements are met by currently configured toolchains and
- * store the selected toolchains in build context for later retrieval by other plugins.
+ * Check that toolchains requirements are met by currently configured toolchains in {@code toolchains.xml} and
+ * store the selected toolchain in build context for later retrieval by other plugins.
  *
  * @author mkleint
  */
@@ -61,10 +61,10 @@ public class ToolchainMojo extends AbstractMojo {
 
     /**
      * Toolchains requirements, specified by one
-     * <pre>  &lt;toolchain-type&gt;
-     *    &lt;param&gt;expected value&lt;/param&gt;
-     *    ...
-     *  &lt;/toolchain-type&gt;</pre>
+     * <pre>{@code   <toolchain-type>
+     *     <param>expected value</param>
+     *     ...
+     *   </toolchain-type>}</pre>
      * element for each required toolchain.
      */
     @Parameter(required = true)

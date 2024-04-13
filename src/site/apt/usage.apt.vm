@@ -34,7 +34,7 @@ Usage
   tools (including location and other information).
 
   Maven Toolchains Plugin can read which toolchains are available on the user's
-  computer (as configured in <<<toolchains.xml>>>) and match them against the
+  computer (as configured in <<<~/.m2/toolchains.xml>>>) and match them against the
   toolchain requirements of the project (as configured in <<<pom.xml>>>). If a
   match is found, the toolchain is made available to other, <toolchain aware>,
   Maven plugins in the build.

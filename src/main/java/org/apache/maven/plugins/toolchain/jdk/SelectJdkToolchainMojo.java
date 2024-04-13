@@ -50,6 +50,8 @@ import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VERSION
 
 /**
  * Discover JDK toolchains and select a matching one.
+ *
+ * @since 3.2.0
  */
 @Mojo(name = "select-jdk-toolchain", defaultPhase = LifecyclePhase.VALIDATE)
 public class SelectJdkToolchainMojo extends AbstractMojo {
