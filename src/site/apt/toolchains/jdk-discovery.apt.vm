@@ -16,7 +16,7 @@
 ~~ under the License.
 
   ------
-  Discovery mechanism
+  JDK Discovery mechanism
   ------
   Guillaume Nodet
   ------
@@ -71,7 +71,7 @@ JDK Toolchain discovery mechanism
 
   The <<<select-jdk-toolchain>>> goal finds a matching JDK.
   The config below allows using the current JDK, or any other discovered JDK >= 17.
-  The current JDK can be kept for speed, but JDK 17 or higher will be used if the current JDK is older than 17.
+  The current JDK can be kept for speed, but JDK 17 or higher will be used if the current JDK is older than 17:
 
 +---+
 <properties>
@@ -99,6 +99,12 @@ JDK Toolchain discovery mechanism
 <properties>
   <toolchain.jdk.version>JAVA17_HOME</toolchain.jdk.version>
 <properties>
++---+
+
+  You can also do everything only at CLI level, without modifying your <<<pom.xml>>>
+
++---+
+mvn toolchains:select-jdk-toolchain -Dtoolchain.jdk.version="[17,)" compile
 +---+
 
 * Selection mechanism
@@ -135,13 +141,13 @@ JDK Toolchain discovery mechanism
 
   The default value is <<<lts,current,env,version,vendor>>>.
 
-* Toolchains XML file
+* <<<toolchains.xml>>> file
 
-  The generation of the <<<toolchains.xml>>> file is not necessary to use discovered toolchains.
-  The <<<select-jdk-toolchain>>> will select a toolchain amongst explicitly configured toolchains and discovered
-  toolchains. Discovered toolchains are cached in <<<~/.m2/discovered-toolchains-cache.xml>>> file
+  The generation of the <<<toolchains.xml>>> file is not necessary to use discovered JDK toolchains.
+  The <<<select-jdk-toolchain>>> will select a toolchain amongst explicitly configured toolchains in <<<toolchains.xml>>> and discovered
+  JDK toolchains. Discovered JDK toolchains are cached in <<<~/.m2/discovered-jdk-toolchains-cache.xml>>> file
   by default, to speed up builds.
 
-  If you prefer, you can use the <<<generate-jdk-toolchains-xml>>> to generate a toolchain XML.  This can be used in
+  If you prefer, you can use the <<<generate-jdk-toolchains-xml>>> to generate a <<<toolchains.xml>>>.  This can be used in
   conjunction with the <<<discoverToolchains=false>>> configuration to disable discovery and only use explicitly
   configured toolchains.

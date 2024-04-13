@@ -57,7 +57,10 @@ import static java.util.Comparator.comparing;
 import static org.apache.maven.plugins.toolchain.jdk.SelectJdkToolchainMojo.TOOLCHAIN_TYPE_JDK;
 
 /**
- * Toolchain discoverer service
+ * Toolchain discoverer service: tries {@code JAVA{xx}_HOME} environment variables, third party installers and
+ * OS-specific locations.
+ *
+ * @since 3.2.0
  */
 @Named
 @Singleton
@@ -78,7 +81,7 @@ public class ToolchainDiscoverer {
     public static final List<String> SORTED_PROVIDES = Collections.unmodifiableList(
             Arrays.asList(VERSION, RUNTIME_NAME, RUNTIME_VERSION, VENDOR, VENDOR_VERSION, CURRENT, LTS, ENV));
 
-    public static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-toolchains-cache.xml";
+    public static final String DISCOVERED_TOOLCHAINS_CACHE_XML = ".m2/discovered-jdk-toolchains-cache.xml";
 
     public static final String JDK_HOME = "jdkHome";
     public static final String JAVA_HOME = "java.home";
@@ -394,18 +397,27 @@ public class ToolchainDiscoverer {
         return foundJdks;
     }
 
+    /**
+     * Find JDKs in known classical locations.
+     *
+     * @return a set of path where JDKs were found.
+     */
     private Set<Path> doFindJdks() {
         List<Path> dirsToTest = new ArrayList<>();
+
         // add current JDK
         dirsToTest.add(Paths.get(System.getProperty(JAVA_HOME)));
+
         // check environment variables for JAVA{xx}_HOME
         System.getenv().entrySet().stream()
                 .filter(e -> e.getKey().startsWith("JAVA") && e.getKey().endsWith("_HOME"))
                 .map(e -> Paths.get(e.getValue()))
                 .forEach(dirsToTest::add);
+
         final Path userHome = Paths.get(System.getProperty(USER_HOME));
         List<Path> installedDirs = new ArrayList<>();
-        // jdk installed by third
+
+        // JDK installed by third-party tool managers
         installedDirs.add(userHome.resolve(".jdks"));
         installedDirs.add(userHome.resolve(".m2").resolve("jdks"));
         installedDirs.add(userHome.resolve(".sdkman").resolve("candidates").resolve("java"));
@@ -414,7 +426,8 @@ public class ToolchainDiscoverer {
         installedDirs.add(userHome.resolve(".jbang").resolve("cache").resolve("jdks"));
         installedDirs.add(userHome.resolve(".asdf").resolve("installs"));
         installedDirs.add(userHome.resolve(".jabba").resolve("jdk"));
-        // os related directories
+
+        // OS related directories
         String osname = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         boolean macos = osname.startsWith("mac");
         boolean win = osname.startsWith("win");
@@ -437,6 +450,7 @@ public class ToolchainDiscoverer {
             installedDirs.add(Paths.get("/opt/java"));
             installedDirs.add(Paths.get("/usr/lib/jvm"));
         }
+
         for (Path dest : installedDirs) {
             if (Files.isDirectory(dest)) {
                 try (Stream<Path> stream = Files.list(dest)) {
@@ -451,6 +465,7 @@ public class ToolchainDiscoverer {
                 }
             }
         }
+
         // only keep directories that have a javac file
         return dirsToTest.stream()
                 .filter(ToolchainDiscoverer::hasJavaC)

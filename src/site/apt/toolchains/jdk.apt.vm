@@ -25,7 +25,7 @@
 
 JDK Toolchain
 
-Note that this page refers to hand-written JDK toolchains.  For a simpler setup, look at the {{{./discovery.html}discovery mechanism}}.
+  Note that this page refers to hand-written JDK toolchains in <<<~/.m2/toolchains.xml>>>.  For a simpler setup, look at the {{{./jdk-discovery.html}JDK discovery mechanism}}.
 
 * Toolchain Description
 
@@ -33,16 +33,16 @@ Note that this page refers to hand-written JDK toolchains.  For a simpler setup,
  
   Predefined <<<\<provides\>>>> identification tokens, for requirement matching in plugin configuration, are:
 
-    * "<<<version>>>" marks the version of the JDK in <<<toolchain.xml>>>. In plugin's selection, this can be either a single version or a version range.
+    * "<<<version>>>" marks the version of the JDK in <<<toolchains.xml>>>. In plugin's selection, this can be either a single version or a version range.
 
     * Other tokens are accepted, but only exact matches are supported.
 
     []
 
-  There is only one <<<toolchains.xml>>> <<<\<configuration\>>>> element named "<<<jdkHome>>>". It designates the root directory
+  In <<<toolchains.xml>>>, there is only one <<<\<configuration\>>>> element named "<<<jdkHome>>>". It designates the root directory
   of a JDK installation.
 
-* Sample <<<toolchains.xml>>> setup
+* Sample <<<~/.m2/toolchains.xml>>> setup
 
 +---+
 <toolchains>

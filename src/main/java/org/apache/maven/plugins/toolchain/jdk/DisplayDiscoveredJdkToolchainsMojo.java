@@ -34,6 +34,8 @@ import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.SORTED_
 
 /**
  * Discover the JDK toolchains and print them to the console.
+ *
+ * @since 3.2.0
  */
 @Mojo(name = "display-discovered-jdk-toolchains", requiresProject = false)
 public class DisplayDiscoveredJdkToolchainsMojo extends AbstractMojo {
