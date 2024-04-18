@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>maven-toolchains-plugin</artifactId>
-  <version>3.2.0</version>
+  <version>3.2.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven Toolchains Plugin</name>
@@ -48,7 +48,7 @@ under the License.
   <scm>
     <connection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</developerConnection>
-    <tag>maven-toolchains-plugin-3.2.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -69,7 +69,7 @@ under the License.
   <properties>
     <javaVersion>8</javaVersion>
     <mavenVersion>3.9.6</mavenVersion>
-    <project.build.outputTimestamp>2024-04-18T00:33:52Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-04-18T00:34:08Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
