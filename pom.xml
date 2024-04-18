@@ -46,8 +46,8 @@ under the License.
   </prerequisites>
 
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-toolchains-plugin.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-toolchains-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
   </scm>
