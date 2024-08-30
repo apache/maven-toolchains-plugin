@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -18,36 +17,39 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>maven-plugins</artifactId>
     <groupId>org.apache.maven.plugins</groupId>
-    <version>33</version>
+    <artifactId>maven-plugins</artifactId>
+    <version>43</version>
     <relativePath />
   </parent>
 
   <artifactId>maven-toolchains-plugin</artifactId>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.2.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven Toolchains Plugin</name>
-  <description>
-    The Toolchains Plugins allows to share configuration across plugins. For example to make sure the plugins like
-    compiler, surefire, javadoc, webstart etc. all use the same JDK for execution.
-  </description>
+  <description>The Toolchains Plugins allows to share configuration across plugins. For example to make sure the plugins like
+    compiler, surefire, javadoc, webstart etc. all use the same JDK for execution.</description>
+
+  <contributors>
+    <contributor>
+      <name>Jim Gough</name>
+    </contributor>
+  </contributors>
 
   <prerequisites>
-    <maven>${mavenVersion}</maven>
+    <maven>3.6.3</maven>
   </prerequisites>
 
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-toolchains-plugin.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-toolchains-plugin.git</developerConnection>
-    <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
+    <connection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</developerConnection>
     <tag>HEAD</tag>
+    <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
     <system>jira</system>
@@ -55,7 +57,7 @@ under the License.
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://builds.apache.org/job/maven-box/job/maven-toolchains-plugin/</url>
+    <url>https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-toolchains-plugin/</url>
   </ciManagement>
   <distributionManagement>
     <site>
@@ -64,42 +66,95 @@ under the License.
     </site>
   </distributionManagement>
 
-  <contributors>
-    <contributor>
-      <name>Jim Gough</name>
-    </contributor>
-  </contributors>
-
   <properties>
-    <mavenVersion>3.8.1</mavenVersion>
-    <javaVersion>7</javaVersion>
+    <javaVersion>8</javaVersion>
+    <mavenVersion>3.9.9</mavenVersion>
+    <project.build.outputTimestamp>2024-04-18T00:34:08Z</project.build.outputTimestamp>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.11.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>${mavenVersion}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-xml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.36</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.plexus</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-  
-  <reporting>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <configuration>
+            <pom>
+              <includes>
+                <include>pom.xml</include>
+                <include>src/it/**/pom.xml</include>
+              </includes>
+            </pom>
+            <java>
+              <includes>
+                <include>src/**/*.java</include>
+              </includes>
+            </java>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>3.0.0</version>
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
       </plugin>
     </plugins>
-  </reporting>
+  </build>
 </project>

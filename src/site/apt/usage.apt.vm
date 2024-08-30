@@ -30,16 +30,17 @@ Usage
 
 * What is a toolchain?
 
-  A Toolchain is an object that Maven plugins can use to retrieve preconfigured
+  A {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/Toolchain.html}Toolchain}} is an object that Maven plugins can use to retrieve preconfigured
   tools (including location and other information).
 
   Maven Toolchains Plugin can read which toolchains are available on the user's
-  computer (as configured in <<<toolchains.xml>>>) and match them against the
+  computer (as configured in <<<~/.m2/toolchains.xml>>>) and match them against the
   toolchain requirements of the project (as configured in <<<pom.xml>>>). If a
-  match is found, the toolchain is made available to other, toolchain aware,
-  Maven plugins in the build. A list of which plugins are toolchain aware can be
-  found in
-  {{{http://maven.apache.org/guides/mini/guide-using-toolchains.html}this guide}}.
+  match is found, the toolchain is made available to other, <toolchain aware>,
+  Maven plugins in the build.
+
+  A list of which plugins are <toolchain aware> can be found in the
+  {{{/guides/mini/guide-using-toolchains.html}Guide to Using Toolchains}}.
 
   With the <<<jdk>>> toolchain, for example, instead of being stuck with the JDK
   used to run Maven, all plugins can use the same other JDK instance without
@@ -50,10 +51,10 @@ Usage
 
   This goal is bound by default to the <<<validate>>> lifecycle phase, the
   first phase in the lifecycle. This is necessary so that all the plugins that
-  are bound to later lifecycle phases are made aware of the available
-  toolchains.
+  are bound to later lifecycle phases are made aware of the selected
+  toolchain(s).
 
-  That being said, you still need to configure the plugin in your <<<pom.xml>>>.
+  That being said, you still need to configure the plugin in your <<<pom.xml>>> to select expected toolchain(s).
   In order for it to execute, you need to add an execution for it, like this:
 
 +---+
@@ -66,6 +67,11 @@ Usage
         <version>${project.version}</version>
         <configuration>
           <!-- Configure your toolchain requirements here -->
+          <toolchain-type>
+            <param>expected value</param>
+            ...
+          </toolchain-type>
+          ...
         </configuration>
         <executions>
           <execution>
@@ -80,8 +86,42 @@ Usage
 </project>
 +---+
 
-  You can read more about which standard toolchains are available
-  {{{./toolchains/index.html}here}}.
+  You can read more about which standard toolchains are available {{{./toolchains/index.html}here}}.
+
+  When executing, output will show toolchain(s) selection, for example:
+
+-------
+[INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
+[INFO] Required toolchain: jdk [ version='11' ]
+[INFO] Found matching toolchain for type jdk: JDK[/opt/jdk-11]
+-------
+
+  or fail if no toolchain was found matching expected requirements:
+
+-------
+[INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
+[INFO] Required toolchain: jdk [ version='17' ]
+[ERROR] No toolchain matched from 2 found for type jdk
+[ERROR] Cannot find matching toolchain definitions for the following toolchain types:
+jdk [ version='17' ]
+-------
+
+* The <<<toolchains.xml>>> Descriptor
+
+  Toolchains available on the building machine are described in <<<~/.m2/toolchains.xml>>>:
+
+  * toolchain <<<\<type\>>>>,
+
+  * <<<\<provides\>>>> elements to describe toolchain characteristics that can later be matched from plugin, when
+  multiple toolchains for one <<<type>>> are available,
+
+  * <<<\<configuration\>>>> elements to configure access the toolchain.
+
+  []
+
+  See {{{/ref/current/maven-core/toolchains.html}Toolchains Descriptor}} for details on its structure.
+
+  You can read more about which elements standard toolchains propose {{{./toolchains/index.html}here}}.
 
 * Generic Plugin configuration information
 

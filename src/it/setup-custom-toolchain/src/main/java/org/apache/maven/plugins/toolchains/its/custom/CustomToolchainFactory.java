@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.toolchains.its.custom;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.plugins.toolchains.its.custom;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.plugins.toolchains.its.custom;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.toolchains.its.custom;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -27,8 +26,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.toolchain.MisconfiguredToolchainException;
 import org.apache.maven.toolchain.RequirementMatcher;
 import org.apache.maven.toolchain.RequirementMatcherFactory;
@@ -47,81 +44,67 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
  *
  * @author Hervé Boutemy
  */
-@Component( role = ToolchainFactory.class, hint = "custom" )
-public class CustomToolchainFactory
-    implements ToolchainFactory
-{
+@Component(role = ToolchainFactory.class, hint = "custom")
+public class CustomToolchainFactory implements ToolchainFactory {
 
     @Requirement
     private Logger logger;
 
-    public ToolchainPrivate createToolchain( ToolchainModel model )
-        throws MisconfiguredToolchainException
-    {
-        if ( model == null )
-        {
+    public ToolchainPrivate createToolchain(ToolchainModel model) throws MisconfiguredToolchainException {
+        if (model == null) {
             return null;
         }
 
-        CustomToolchainImpl customToolchain = new CustomToolchainImpl( model, logger );
+        CustomToolchainImpl customToolchain = new CustomToolchainImpl(model, logger);
 
         // populate the provides section
-        Properties provides = getProvidesProperties( model );
+        Properties provides = getProvidesProperties(model);
 
-        for ( Map.Entry<Object, Object> provide : provides.entrySet() )
-        {
+        for (Map.Entry<Object, Object> provide : provides.entrySet()) {
             String key = (String) provide.getKey();
             String value = (String) provide.getValue();
 
-            if ( value == null )
-            {
+            if (value == null) {
                 throw new MisconfiguredToolchainException(
-                    "Provides token '" + key + "' doesn't have any value configured." );
+                        "Provides token '" + key + "' doesn't have any value configured.");
             }
 
             RequirementMatcher matcher;
-            if ( "version".equals( key ) )
-            {
-                matcher = RequirementMatcherFactory.createVersionMatcher( value );
-            }
-            else
-            {
-                matcher = RequirementMatcherFactory.createExactMatcher( value );
+            if ("version".equals(key)) {
+                matcher = RequirementMatcherFactory.createVersionMatcher(value);
+            } else {
+                matcher = RequirementMatcherFactory.createExactMatcher(value);
             }
 
-            customToolchain.addProvideToken( key, matcher );
+            customToolchain.addProvideToken(key, matcher);
         }
 
         // populate the configuration section
-        Properties configuration = toProperties( (Xpp3Dom) model.getConfiguration() );
+        Properties configuration = toProperties((Xpp3Dom) model.getConfiguration());
 
-        String toolHome = configuration.getProperty( CustomToolchainImpl.KEY_TOOLHOME );
-        if ( toolHome == null )
-        {
-            throw new MisconfiguredToolchainException( "Custom toolchain without the "
-                + CustomToolchainImpl.KEY_TOOLHOME + " configuration element." );
+        String toolHome = configuration.getProperty(CustomToolchainImpl.KEY_TOOLHOME);
+        if (toolHome == null) {
+            throw new MisconfiguredToolchainException(
+                    "Custom toolchain without the " + CustomToolchainImpl.KEY_TOOLHOME + " configuration element.");
         }
 
-        toolHome = FileUtils.normalize( toolHome );
-        customToolchain.setToolHome( toolHome );
+        toolHome = FileUtils.normalize(toolHome);
+        customToolchain.setToolHome(toolHome);
 
-        if ( !new File( toolHome ).exists() )
-        {
-            throw new MisconfiguredToolchainException( "Non-existing tool home configuration at "
-                                                        + new File( toolHome ).getAbsolutePath() );
+        if (!new File(toolHome).exists()) {
+            throw new MisconfiguredToolchainException(
+                    "Non-existing tool home configuration at " + new File(toolHome).getAbsolutePath());
         }
 
         return customToolchain;
     }
 
-    public ToolchainPrivate createDefaultToolchain()
-    {
+    public ToolchainPrivate createDefaultToolchain() {
         // not sure it's necessary to provide a default toolchain here.
         return null;
     }
 
-    protected Logger getLogger()
-    {
+    protected Logger getLogger() {
         return logger;
     }
 
@@ -129,57 +112,45 @@ public class CustomToolchainFactory
      * Get <code>provides</code> properties in in a way compatible with toolchains descriptor version 1.0
      * (Maven 2.0.9 to 3.2.3, where it is represented as Object/DOM) and descriptor version 1.1
      * (Maven 3.2.4 and later, where it is represented as Properties).
-     * 
+     *
      * @param model the toolchain model as read from XML
      * @return the properties defined in the <code>provides</code> element
-     * @see <a href="https://issues.apache.org/jira/browse/MNG-5718">MNG-5718</a> 
+     * @see <a href="https://issues.apache.org/jira/browse/MNG-5718">MNG-5718</a>
      */
-    protected Properties getProvidesProperties( ToolchainModel model )
-    {
-        Object value = getBeanProperty( model, "provides" );
+    protected Properties getProvidesProperties(ToolchainModel model) {
+        Object value = getBeanProperty(model, "provides");
 
-        return ( value instanceof Properties ) ? (Properties) value : toProperties( (Xpp3Dom) value );
+        return (value instanceof Properties) ? (Properties) value : toProperties((Xpp3Dom) value);
     }
 
-    protected Properties toProperties( Xpp3Dom dom )
-    {
+    protected Properties toProperties(Xpp3Dom dom) {
         Properties props = new Properties();
 
         Xpp3Dom[] children = dom.getChildren();
-        for ( Xpp3Dom child : children )
-        {
-            props.put( child.getName(), child.getValue() );
+        for (Xpp3Dom child : children) {
+            props.put(child.getName(), child.getValue());
         }
 
         return props;
     }
 
-    protected Object getBeanProperty( Object obj, String property )
-    {
-        try
-        {
-            Method method = new PropertyDescriptor( property, obj.getClass() ).getReadMethod();
+    protected Object getBeanProperty(Object obj, String property) {
+        try {
+            Method method = new PropertyDescriptor(property, obj.getClass()).getReadMethod();
 
-            return method.invoke( obj );
-        }
-        catch ( IntrospectionException e )
-        {
-            throw new RuntimeException( "Incompatible toolchain API", e );
-        }
-        catch ( IllegalAccessException e )
-        {
-            throw new RuntimeException( "Incompatible toolchain API", e );
-        }
-        catch ( InvocationTargetException e )
-        {
+            return method.invoke(obj);
+        } catch (IntrospectionException e) {
+            throw new RuntimeException("Incompatible toolchain API", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Incompatible toolchain API", e);
+        } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
 
-            if ( cause instanceof RuntimeException )
-            {
+            if (cause instanceof RuntimeException) {
                 throw (RuntimeException) cause;
             }
 
-            throw new RuntimeException( "Incompatible toolchain API", e );
+            throw new RuntimeException("Incompatible toolchain API", e);
         }
     }
 }

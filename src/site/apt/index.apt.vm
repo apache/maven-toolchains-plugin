@@ -25,30 +25,42 @@
 
 ${project.name}
 
-  The Toolchains Plugins allows to share configuration across plugins.
-  For example to make sure the plugins like compiler, surefire, javadoc, webstart etc. all use the same JDK for execution.
-  Similarly to maven-enforcer-plugin, it allows you to control environmental constraints in the build.
+  The Toolchains Plugins enables sharing tool configuration across plugins;
+  for example, to make sure that plugins like compiler, surefire, and javadoc all use the same JDK for
+  execution, independently from JRE used to run Maven itself.
 
 * Goals Overview
 
-  The Toolchains plugin has one goal:
+  Since version 3.2.0, a new JDK-specific toolchains mechanism is provided.  This relies on an automatic JDK discovery mechanism based
+  on an internal heuristic which tries to detect JDKs from known locations. Read about the {{{./toolchains/jdk-discovery.html}JDK discovery mechanism}} for more
+  information. This mechanism is to be used with the goal:
 
-  * {{{./toolchain-mojo.html}toolchain:toolchain}} checks that toolchains requirements are met by currently configured toolchains.
+    * {{{./select-jdk-toolchain-mojo.html}toolchains:select-jdk-toolchain}} discover and selects a matching JDK toolchain.
+
+  Two associated helper goals are also provided:
+
+    * {{{./display-discovered-jdk-toolchains-mojo.html}toolchains:display-discovered-jdk-toolchains}} displays discovered JDK toolchains to the console,
+
+    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format and let user copy/paste.
+
+  The previous <<<toolchain>>> goal is still available for JDK and {{{./toolchains/custom.html}other types}} of toolchains:
+
+    * {{{./toolchain-mojo.html}toolchains:toolchain}} selects a toolchain from <<<toolchains.xml>>> based on configured build requirements and stores it in build context for later retrieval by other plugins.
 
 * Usage
 
   General instructions on how to use the Toolchains Plugin can be found on the {{{./usage.html}usage page}}.
   Additionally, users can contribute to the {{{https://github.com/apache/maven-toolchains-plugin}GitHub project}}.
 
-  In case you still have questions regarding the plugin's usage, please feel
-  free to contact the {{{./mail-lists.html}user mailing list}}. The posts to the mailing list are archived and could
+  If you have questions regarding the plugin's usage, 
+  contact the {{{./mailing-lists.html}user mailing list}}. Posts to the mailing list are archived and could
   already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
-  the {{{./mail-lists.html}mail archive}}.
+  the {{{./mailing-lists.html}mail archive}}.
 
-  If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
-  {{{./issue-tracking.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
+  If the plugin is missing a feature or has a defect, you can file a feature request or bug report in our
+  {{{./issue-management.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
   concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
-  entire debug logs, POMs or most preferably little demo projects attached to the issue are very much appreciated.
+  entire debug logs, POMs, or most preferably little demo projects attached to the issue are very much appreciated.
   Of course, patches are welcome, too. Contributors can check out the project from our
-  {{{./source-repository.html}source repository}} and will find supplementary information in the
-  {{{http://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
+  {{{./scm.html}source repository}} and will find supplementary information in the
+  {{{https://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -18,9 +17,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.maven.plugins.toolchains.its</groupId>
@@ -29,10 +26,8 @@ under the License.
   <packaging>maven-plugin</packaging>
 
   <name>maven-toolchains-plugin IT: custom toolchain + plugin using it</name>
-  <description>
-    Demo to show how to write a custom toolchain type, a plugin using this custom toolchain,
-    to later write a project that uses the toolchain and plugin.
-  </description>
+  <description>Demo to show how to write a custom toolchain type, a plugin using this custom toolchain,
+    to later write a project that uses the toolchain and plugin.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -108,7 +103,8 @@ under the License.
             <goals>
               <goal>helpmojo</goal>
             </goals>
-            <configuration><!-- TODO: remove when upgrading plugin-tools to 3.4: see MPLUGIN-238 -->
+            <configuration>
+              <!-- TODO: remove when upgrading plugin-tools to 3.4: see MPLUGIN-238 -->
               <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
             </configuration>
           </execution>
@@ -119,7 +115,8 @@ under the License.
 
   <profiles>
     <profile>
-      <id>maven-2</id><!-- only necessary to build with Maven 2 -->
+      <id>maven-2</id>
+      <!-- only necessary to build with Maven 2 -->
       <activation>
         <file>
           <!--  This employs that the basedir expression is only recognized by Maven 3.x (see MNG-2363) -->
@@ -138,7 +135,8 @@ under the License.
             <executions>
               <execution>
                 <id>mojo-descriptor</id>
-                <goals><!-- Maven 2 does not support phase overriding: need to add an execution -->
+                <goals>
+                  <!-- Maven 2 does not support phase overriding: need to add an execution -->
                   <goal>descriptor</goal>
                 </goals>
               </execution>
@@ -146,6 +144,6 @@ under the License.
           </plugin>
         </plugins>
       </build>
-    </profile>    
+    </profile>
   </profiles>
 </project>

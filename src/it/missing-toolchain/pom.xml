@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -18,9 +17,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.maven.plugins.toolchains.its</groupId>
@@ -29,9 +26,7 @@ under the License.
   <packaging>jar</packaging>
 
   <name>maven-toolchains-plugin IT: missing toolchain test</name>
-  <description>
-    Check that toolchain requirements are checked and not covered as expected
-  </description>
+  <description>Check that toolchain requirements are checked and not covered as expected</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,6 +38,18 @@ under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-toolchains-plugin</artifactId>
         <version>@project.version@</version>
+        <configuration>
+          <toolchains>
+            <jdk>
+              <version>17</version>
+            </jdk>
+            <fake-type>
+              <attribute>value</attribute>
+              <other-attribute>other-value</other-attribute>
+            </fake-type>
+            <another-fake-type />
+          </toolchains>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -50,16 +57,6 @@ under the License.
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <toolchains>
-            <jdk/>
-            <fake-type>
-              <attribute>value</attribute>
-              <other-attribute>other-value</other-attribute>
-            </fake-type>
-            <another-fake-type/>
-          </toolchains>
-        </configuration>
       </plugin>
     </plugins>
   </build>

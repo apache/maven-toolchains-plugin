@@ -21,12 +21,12 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.maven.plugins.toolchains.its</groupId>
-  <artifactId>use-custom-toolchain</artifactId>
+  <artifactId>select-missing-jdk-toolchain</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>maven-toolchains-plugin IT: use custom toolchain test</name>
-  <description>Check that custom toolchain can be used</description>
+  <name>maven-toolchains-plugin IT: select missing jdk toolchain test</name>
+  <description>Check behaviour when missing jdk toolchain selected</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,9 +40,9 @@ under the License.
         <version>@project.version@</version>
         <configuration>
           <toolchains>
-            <custom>
-              <version>1.5</version>
-            </custom>
+            <jdk>
+              <version>17</version>
+            </jdk>
           </toolchains>
         </configuration>
         <executions>
@@ -50,21 +50,6 @@ under the License.
             <goals>
               <goal>toolchain</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins.toolchains.its</groupId>
-        <artifactId>custom-toolchain-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <extensions>true</extensions>
-        <!-- to share the custom toolchain with maven-toolchains-plugin -->
-        <executions>
-          <execution>
-            <goals>
-              <goal>tool</goal>
-            </goals>
-            <phase>compile</phase>
           </execution>
         </executions>
       </plugin>

@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.toolchain;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.plugins.toolchain;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.plugins.toolchain;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.toolchain;
 
 import java.util.Collections;
 import java.util.Map;
@@ -29,22 +28,18 @@ import java.util.Set;
  * @author mkleint
  * @see ToolchainConverter the custom Plexus converter to instantiate this class
  */
-public final class ToolchainsRequirement
-{
+public final class ToolchainsRequirement {
     Map<String, Map<String, String>> toolchains;
 
-    public Map<String, Map<String, String>> getToolchains()
-    {
-        return Collections.unmodifiableMap( toolchains );
+    public Map<String, Map<String, String>> getToolchains() {
+        return Collections.unmodifiableMap(toolchains);
     }
 
-    public Set<String> getToolchainsTypes()
-    {
-        return Collections.unmodifiableSet( toolchains.keySet() );
+    public Set<String> getToolchainsTypes() {
+        return Collections.unmodifiableSet(toolchains.keySet());
     }
 
-    public Map<String, String> getParams( String type )
-    {
-        return Collections.unmodifiableMap( toolchains.get( type ) );
+    public Map<String, String> getParams(String type) {
+        return Collections.unmodifiableMap(toolchains.get(type));
     }
 }

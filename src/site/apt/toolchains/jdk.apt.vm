@@ -25,58 +25,52 @@
 
 JDK Toolchain
 
+  Note that this page refers to hand-written JDK toolchains in <<<~/.m2/toolchains.xml>>>.  For a simpler setup, look at the {{{./jdk-discovery.html}JDK discovery mechanism}}.
 
-* Toolchain Identification
+* Toolchain Description
 
   The toolchain type id for JDK is "<<<jdk>>>".
  
-  Predefined identification tokens, for requirement matching, are:
+  Predefined <<<\<provides\>>>> identification tokens, for requirement matching in plugin configuration, are:
 
-  * "<<<version>>>" marks the version of the jdk. Maven Toolchains Plugin can match against a single version or any version ranges,
+    * "<<<version>>>" marks the version of the JDK in <<<toolchains.xml>>>. In plugin's selection, this can be either a single version or a version range.
 
-  * any other tokens will be accepted, but only exact matches are supported.
+    * Other tokens are accepted, but only exact matches are supported.
 
-  []
+    []
 
-* Toolchain Configuration
+  In <<<toolchains.xml>>>, there is only one <<<\<configuration\>>>> element named "<<<jdkHome>>>". It designates the root directory
+  of a JDK installation.
 
-  There is only one configuration element named "<<<jdkHome>>>". It designates the root directory
-  of JDK installation.
-
-* Sample <<<toolchains.xml>>> setup
+* Sample <<<~/.m2/toolchains.xml>>> setup
 
 +---+
 <toolchains>
   <toolchain>
     <type>jdk</type>
     <provides>
-      <version>1.5</version>
-      <vendor>sun</vendor>
-      <id>for_mevenide</id>
+      <version>11</version>
+      <vendor>temurin</vendor>
+      <purpose>for_mevenide</purpose>
     </provides>
     <configuration>
-      <jdkHome>/home/mkleint/javatools/jdk</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home</jdkHome>
     </configuration>
   </toolchain>
   [...]
 </toolchains>
 +---+
 
+  This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
+
+  A project can request this toolchain by specifying the type "jdk" and the version "11".
+  It can also use a version range that includes 11 like <<<[8, 17]>>>. It can also ask for the
+  vendor temurin, with or without version, or the purpose "for_mevenide".
+
+
 * Toolchains Plugin Configuration
 
-  For selection of toolchain for use by the project, the following conditions are matched
-  against the definitions in the <<<toolchains.xml>>> file:
-
-  * "<<<version>>>" which accepts any {{{/plugins/maven-enforcer-plugin/rules/versionRanges.html}version range definitions}}.
-    Version declared by the toolchain needs to fit into the range,
-
-  * any other tokens needs exact match. Toolchain not providing such token will not be selected.
-
-  []
-
-  All conditions need to be satisfied in a sucessfully matched toolchain.
-
-* Sample Plugin Configuration
+  A project specifies a toolchain in the configuration of the maven-toolchains-plugin like so:
 
 +---+
 <project>
@@ -97,7 +91,7 @@ JDK Toolchain
         <configuration>
           <toolchains>
             <jdk>
-              <version>[1.5,)</version>
+              <version>[1.8,)</version>
             </jdk>
           </toolchains>
         </configuration>
@@ -107,3 +101,26 @@ JDK Toolchain
   [...]
 </project>
 +---+
+
+  In this example, the project is requesting any toolchain with type jdk that has a version of 1.8 or greater.
+  "<<<version>>>" accepts any {{{/enforcer/enforcer-rules/versionRanges.html}version range definitions}}.
+  If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configured like this:
+
++---+
+        <configuration>
+          <toolchains>
+            <jdk>
+              <version>1.8</version>
+              <vendor>temurin</vendor>
+            </jdk>
+          </toolchains>
+        </configuration>
++---+
+
+  Aside from version, the definitions are opaque strings. Maven looks in <<<toolchains.xml>>>
+  for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care
+  what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured
+  by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project,
+  or JDK 21 from Oracle. JDK toolchain only checks that directory exists.
+
+  All conditions need to be satisfied to find a toolchain.
