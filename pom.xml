@@ -71,7 +71,7 @@ under the License.
   </contributors>
 
   <properties>
-    <mavenVersion>3.0</mavenVersion>
+    <mavenVersion>3.8.1</mavenVersion>
     <javaVersion>7</javaVersion>
   </properties>
 
