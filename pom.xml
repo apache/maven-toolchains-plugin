@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>maven-toolchains-plugin</artifactId>
-  <version>3.2.1-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven Toolchains Plugin</name>
@@ -42,7 +42,7 @@ under the License.
   </contributors>
 
   <prerequisites>
-    <maven>3.6.3</maven>
+    <maven>${mavenVersion}</maven>
   </prerequisites>
 
   <scm>
@@ -67,8 +67,8 @@ under the License.
   </distributionManagement>
 
   <properties>
-    <javaVersion>8</javaVersion>
-    <mavenVersion>3.9.9</mavenVersion>
+    <javaVersion>17</javaVersion>
+    <mavenVersion>4.0.0-rc-3-SNAPSHOT</mavenVersion>
     <project.build.outputTimestamp>2024-04-18T00:34:08Z</project.build.outputTimestamp>
   </properties>
 
@@ -87,43 +87,39 @@ under the License.
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
+      <artifactId>maven-api-core</artifactId>
       <version>${mavenVersion}</version>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-api-di</artifactId>
+      <version>${mavenVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-xml</artifactId>
+      <version>${mavenVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.16</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
       <version>${mavenVersion}</version>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-xml</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.36</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.sisu</groupId>
-      <artifactId>org.eclipse.sisu.plexus</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.15.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -131,6 +127,11 @@ under the License.
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>4.0.0-beta-1</version>
+        </plugin>
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
@@ -150,11 +151,5 @@ under the License.
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.sisu</groupId>
-        <artifactId>sisu-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
   </build>
 </project>
