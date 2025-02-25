@@ -18,29 +18,26 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.toolchain.model.PersistedToolchains;
-import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Writer;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.di.Inject;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.xml.ToolchainsXmlFactory;
+import org.apache.maven.api.toolchain.PersistedToolchains;
 
 /**
  * Run the JDK toolchain discovery mechanism and generates a toolchains XML.
  *
- * @since 3.2.0
+ * TODO: Maven 4 plugins need to be thread safe. Please verify and fix thread safety issues.
  */
-@Mojo(name = "generate-jdk-toolchains-xml", requiresProject = false)
-public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {
+@Mojo(name = "generate-jdk-toolchains-xml", projectRequired = false)
+public class GenerateJdkToolchainsXmlMojo implements org.apache.maven.api.plugin.Mojo {
 
     /**
      * The path and name pf the toolchain XML file that will be generated.
@@ -55,23 +52,24 @@ public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {
     @Inject
     ToolchainDiscoverer discoverer;
 
+    @Inject
+    Session session;
+
     @Override
-    public void execute() throws MojoFailureException {
+    public void execute() throws org.apache.maven.api.plugin.MojoException {
         try {
             PersistedToolchains toolchains = discoverer.discoverToolchains();
             if (file != null) {
                 Path file = Paths.get(this.file).toAbsolutePath();
                 Files.createDirectories(file.getParent());
-                try (Writer writer = Files.newBufferedWriter(file)) {
-                    new MavenToolchainsXpp3Writer().write(writer, toolchains);
-                }
+                session.getService(ToolchainsXmlFactory.class).write(toolchains, file);
             } else {
                 StringWriter writer = new StringWriter();
-                new MavenToolchainsXpp3Writer().write(writer, toolchains);
+                session.getService(ToolchainsXmlFactory.class).write(toolchains, writer);
                 System.out.println(writer);
             }
         } catch (IOException e) {
-            throw new MojoFailureException("Unable to generate toolchains.xml", e);
+            throw new org.apache.maven.api.plugin.MojoException("Unable to generate toolchains.xml", e);
         }
     }
 }
