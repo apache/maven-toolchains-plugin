@@ -52,8 +52,8 @@ under the License.
     <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
-    <system>jira</system>
-    <url>https://issues.apache.org/jira/browse/MTOOLCHAINS</url>
+    <system>GitHub Issues</system>
+    <url>https://github.com/apache/maven-toolchains-plugin/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
