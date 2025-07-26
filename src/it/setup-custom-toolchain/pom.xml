@@ -40,11 +40,6 @@ under the License.
       <artifactId>maven-core</artifactId>
       <version>3.0.5</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.36</version>
-    </dependency>
 
     <!-- plugin API and plugin-tools -->
     <dependency>
