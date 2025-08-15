@@ -428,6 +428,11 @@ public class ToolchainDiscoverer {
         installedDirs.add(userHome.resolve(".jbang").resolve("cache").resolve("jdks"));
         installedDirs.add(userHome.resolve(".asdf").resolve("installs"));
         installedDirs.add(userHome.resolve(".jabba").resolve("jdk"));
+        installedDirs.add(userHome.resolve(".local")
+                .resolve("share")
+                .resolve("mise")
+                .resolve("installs")
+                .resolve("java"));
 
         // OS related directories
         String osname = System.getProperty("os.name").toLowerCase(Locale.ROOT);
@@ -436,8 +441,10 @@ public class ToolchainDiscoverer {
         if (macos) {
             installedDirs.add(Paths.get("/Library/Java/JavaVirtualMachines"));
             installedDirs.add(userHome.resolve("Library/Java/JavaVirtualMachines"));
+            installedDirs.add(userHome.resolve("hostedtoolcache"));
         } else if (win) {
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
+            installedDirs.add(Paths.get("C:\\hostedtoolcache\\windows\\"));
             Path scoop = userHome.resolve("scoop").resolve("apps");
             if (Files.isDirectory(scoop)) {
                 try (Stream<Path> stream = Files.list(scoop)) {
@@ -449,8 +456,11 @@ public class ToolchainDiscoverer {
         } else {
             installedDirs.add(Paths.get("/usr/jdk"));
             installedDirs.add(Paths.get("/usr/java"));
+            installedDirs.add(Paths.get("/usr/local/java"));
             installedDirs.add(Paths.get("/opt/java"));
+            installedDirs.add(Paths.get("/opt/hostedtoolcache"));
             installedDirs.add(Paths.get("/usr/lib/jvm"));
+            installedDirs.add(Paths.get("/usr/lib64/jvm"));
         }
 
         for (Path dest : installedDirs) {
