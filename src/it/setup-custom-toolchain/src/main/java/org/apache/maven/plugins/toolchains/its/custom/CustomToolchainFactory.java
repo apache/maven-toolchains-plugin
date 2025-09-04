@@ -18,6 +18,10 @@
  */
 package org.apache.maven.plugins.toolchains.its.custom;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -32,8 +36,6 @@ import org.apache.maven.toolchain.RequirementMatcherFactory;
 import org.apache.maven.toolchain.ToolchainFactory;
 import org.apache.maven.toolchain.ToolchainPrivate;
 import org.apache.maven.toolchain.model.ToolchainModel;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -44,10 +46,11 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
  *
  * @author Hervé Boutemy
  */
-@Component(role = ToolchainFactory.class, hint = "custom")
+@Singleton
+@Named("custom")
 public class CustomToolchainFactory implements ToolchainFactory {
 
-    @Requirement
+    @Inject
     private Logger logger;
 
     public ToolchainPrivate createToolchain(ToolchainModel model) throws MisconfiguredToolchainException {

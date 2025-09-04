@@ -238,8 +238,10 @@ public class ToolchainDiscoverer {
         ToolchainModel model = cache.get(jdk);
         if (model == null) {
             model = doGetToolchainModel(jdk);
-            cache.put(jdk, model);
-            cacheModified = true;
+            if (model != null) {
+                cache.put(jdk, model);
+                cacheModified = true;
+            }
         }
         return model;
     }
