@@ -68,7 +68,7 @@ under the License.
 
   <properties>
     <javaVersion>8</javaVersion>
-    <mavenVersion>3.9.11</mavenVersion>
+    <mavenVersion>3.9.12</mavenVersion>
     <project.build.outputTimestamp>2024-04-18T00:34:08Z</project.build.outputTimestamp>
   </properties>
 
