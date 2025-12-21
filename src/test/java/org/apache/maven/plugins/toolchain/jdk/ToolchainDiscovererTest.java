@@ -30,13 +30,13 @@ import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ToolchainDiscovererTest {
+class ToolchainDiscovererTest {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Test
     @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
-    void testDiscovery() {
+    void discovery() {
         ToolchainDiscoverer discoverer = new ToolchainDiscoverer();
         PersistedToolchains persistedToolchains = discoverer.discoverToolchains();
         assertNotNull(persistedToolchains);
