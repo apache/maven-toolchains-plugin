@@ -31,6 +31,7 @@ under the License.
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>8</maven.compiler.release>
   </properties>
 
   <dependencies>
@@ -65,7 +66,7 @@ under the License.
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.14.1</version>
       </plugin>
       <plugin>
         <artifactId>maven-install-plugin</artifactId>
