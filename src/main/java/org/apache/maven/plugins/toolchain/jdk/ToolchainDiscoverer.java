@@ -443,7 +443,11 @@ public class ToolchainDiscoverer {
             installedDirs.add(userHome.resolve("Library/Java/JavaVirtualMachines"));
             installedDirs.add(userHome.resolve("hostedtoolcache"));
         } else if (win) {
+            installedDirs.add(Paths.get("C:\\Program Files\\Amazon Corretto\\"));
+            installedDirs.add(Paths.get("C:\\Program Files\\BellSoft\\"));
+            installedDirs.add(Paths.get("C:\\Program Files\\Eclipse Adoptium\\"));
             installedDirs.add(Paths.get("C:\\Program Files\\Java\\"));
+            installedDirs.add(Paths.get("C:\\Program Files\\Zulu\\"));
             installedDirs.add(Paths.get("C:\\hostedtoolcache\\windows\\"));
             Path scoop = userHome.resolve("scoop").resolve("apps");
             if (Files.isDirectory(scoop)) {
