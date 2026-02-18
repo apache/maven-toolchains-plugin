@@ -426,7 +426,7 @@ public class ToolchainDiscoverer {
         installedDirs.add(userHome.resolve(".gradle").resolve("jdks"));
         installedDirs.add(userHome.resolve(".jenv").resolve("versions"));
         installedDirs.add(userHome.resolve(".jbang").resolve("cache").resolve("jdks"));
-        installedDirs.add(userHome.resolve(".asdf").resolve("installs"));
+        installedDirs.add(userHome.resolve(".asdf").resolve("installs").resolve("java"));
         installedDirs.add(userHome.resolve(".jabba").resolve("jdk"));
 
         // OS related directories
