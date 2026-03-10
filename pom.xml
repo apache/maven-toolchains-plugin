@@ -146,4 +146,34 @@ under the License.
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>run-its</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.6.1</version>
+            <executions>
+              <execution>
+                <id>sanitize-java-home</id>
+                <goals>
+                  <goal>regex-property</goal>
+                </goals>
+                <!-- Prevent it-test failures on Windows due to interpretation of back-slashes in paths.-->
+                <configuration>
+                  <name>java.home.sanitized</name>
+                  <value>${java.home}</value>
+                  <regex>\\</regex>
+                  <replacement>/</replacement>
+                  <failIfNoMatch>false</failIfNoMatch>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
