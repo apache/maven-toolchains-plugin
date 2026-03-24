@@ -207,7 +207,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
                 ToolchainPrivate tc = factory.createToolchain(tcm);
                 if (tc != null && matches(tc, requirements)) {
                     toolchain = tc;
-                    getLog().debug("Discovered matching JDK toolchain: " + toolchain);
+                    getLog().info("Discovered matching JDK toolchain: " + toolchain);
                     break;
                 }
             }
@@ -223,13 +223,13 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
         if (useJdk == JdkMode.IfSame
                 && currentJdkToolchain != null
                 && Objects.equals(getJdkHome(currentJdkToolchain), getJdkHome(toolchain))) {
-            getLog().debug("Not using an external toolchain as the current JDK '" + currentJdkToolchain
+            getLog().info("Not using an external toolchain as the current JDK '" + currentJdkToolchain
                     + "' has been selected.");
             return;
         }
 
         toolchainManager.storeToolchainToBuildContext(toolchain, session);
-        getLog().debug("Found matching JDK toolchain: " + toolchain);
+        getLog().info("Selected JDK toolchain: " + toolchain);
     }
 
     private boolean matches(ToolchainPrivate tc, Map<String, String> requirements) {
