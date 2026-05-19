@@ -42,8 +42,8 @@ under the License.
       <item name="Download" href="download.html"/>
     </menu>
     <menu name="See Also">
-      <item name="Guide to Using Toolchains" href="/guides/mini/guide-using-toolchains.html"/>
-      <item name="Toolchains Descriptor" href="/ref/current/maven-core/toolchains.html"/>
+      <item name="Guide to Using Toolchains" href="../../guides/mini/guide-using-toolchains.html"/>
+      <item name="Toolchains Descriptor" href="../../ref/current/maven-core/toolchains.html"/>
     </menu>
   </body>
 </project>
