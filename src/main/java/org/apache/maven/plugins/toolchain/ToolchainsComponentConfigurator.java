@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
 import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
+import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
 
 /**
  * A configurator for components that handles toolchain requirements specified in Maven configuration.
@@ -38,6 +39,7 @@ public class ToolchainsComponentConfigurator extends BasicComponentConfigurator 
 
     @Inject
     public ToolchainsComponentConfigurator(@Named("ToolchainsRequirement") ConfigurationConverter toolchainConverter) {
+        this.converterLookup = new DefaultConverterLookup();
         this.converterLookup.registerConverter(toolchainConverter);
     }
 }
