@@ -28,7 +28,7 @@ Custom Toolchains
   You can create custom toolchains to use with standard plugins (such as the maven-compiler-plugin) or with custom plugins.
 
   A full working sample is included in the <<<maven-toolchains-plugin>>> integration tests, which are part of 
-  {{{../source-repository.html}the plugin source tree}}:
+  {{{../scm.html}the plugin source tree}}:
 
   * See <<<src/it/setup-custom-toolchain>>> for the custom toolchain and plugin,
 
@@ -51,9 +51,7 @@ Custom Toolchains
   which is an internal requirement,
 
   * a {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/ToolchainFactory.html}<<<org.apache.maven.toolchain.ToolchainFactory>>>}},
-  provided as Plexus component: Plexus {{{http://plexus.codehaus.org/plexus-containers/plexus-component-annotations/}<<<@Component>>>}}
-  annotation in the class is extracted by {{{http://plexus.codehaus.org/plexus-containers/plexus-component-metadata/}<<<plexus-component-metadata>>>}}
-  plugin.
+  provided as {{{https://maven.apache.org/maven-jsr330.html}JSR-330 component}} <<<@Named>>> with the name of the toolchain and <<<@Singleton>>> annotation.
 
   []
 
