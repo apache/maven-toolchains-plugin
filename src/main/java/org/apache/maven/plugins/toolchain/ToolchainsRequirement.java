@@ -42,4 +42,9 @@ public final class ToolchainsRequirement {
     public Map<String, String> getParams(String type) {
         return Collections.unmodifiableMap(toolchains.get(type));
     }
+
+    @Override
+    public String toString() {
+        return "ToolchainsRequirement{toolchains=" + toolchains + '}';
+    }
 }
