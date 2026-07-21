@@ -51,7 +51,8 @@ Custom Toolchains
   which is an internal requirement,
 
   * a {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/ToolchainFactory.html}<<<org.apache.maven.toolchain.ToolchainFactory>>>}},
-  provided as {{{https://maven.apache.org/maven-jsr330.html}JSR-330 component}} <<<@Named>>> with the name of the toolchain and <<<@Singleton>>> annotation.
+  provided as {{{https://maven.apache.org/maven-jsr330.html}JSR-330 component}} annotated with <<<@Named("<toolchainType>")>>>
+  (e.g. <<<@Named("custom")>>>) and <<<@Singleton>>>.
 
   []
 
