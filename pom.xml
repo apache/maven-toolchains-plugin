@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>maven-toolchains-plugin</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven Toolchains Plugin</name>
@@ -48,7 +48,7 @@ under the License.
   <scm>
     <connection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/apache/maven-toolchains-plugin.git</developerConnection>
-    <tag>maven-toolchains-plugin-3.3.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/apache/maven-toolchains-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -69,7 +69,7 @@ under the License.
   <properties>
     <javaVersion>8</javaVersion>
     <mavenVersion>3.9.16</mavenVersion>
-    <project.build.outputTimestamp>2026-07-21T21:48:33Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-07-21T21:48:43Z</project.build.outputTimestamp>
     <!-- property used in src/it/select-jdk-env-multi/invoker.properties -->
     <JAVA_HOME>${env.JAVA_HOME}</JAVA_HOME>
   </properties>
