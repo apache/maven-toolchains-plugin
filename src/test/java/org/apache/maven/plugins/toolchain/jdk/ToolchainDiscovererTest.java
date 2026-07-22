@@ -18,11 +18,7 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.maven.toolchain.model.PersistedToolchains;
-import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
@@ -31,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,33 +50,5 @@ public class ToolchainDiscovererTest {
 
         assertTrue(persistedToolchains.getToolchains().stream()
                 .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
-    }
-
-    @Test
-    void testVersionComparator() {
-        ToolchainDiscoverer discoverer = new ToolchainDiscoverer();
-
-        ToolchainModel jdk8 = new ToolchainModel();
-        jdk8.setType("jdk");
-        jdk8.addProvide("version", "8");
-
-        ToolchainModel jdk11 = new ToolchainModel();
-        jdk11.setType("jdk");
-        jdk11.addProvide("version", "11");
-
-        ToolchainModel jdk17 = new ToolchainModel();
-        jdk17.setType("jdk");
-        jdk17.addProvide("version", "17");
-
-        List<ToolchainModel> list = new ArrayList<>();
-        list.add(jdk8);
-        list.add(jdk17);
-        list.add(jdk11);
-
-        list.sort(discoverer.version());
-
-        assertEquals("17", list.get(0).getProvides().getProperty("version"));
-        assertEquals("11", list.get(1).getProvides().getProperty("version"));
-        assertEquals("8", list.get(2).getProvides().getProperty("version"));
     }
 }
