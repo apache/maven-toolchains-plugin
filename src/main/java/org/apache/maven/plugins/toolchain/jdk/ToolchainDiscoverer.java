@@ -381,31 +381,30 @@ public class ToolchainDiscoverer {
     }
 
     private static int compareVersionSegments(String sa, String sb) {
-        int na = parseVersionSegment(sa);
-        int nb = parseVersionSegment(sb);
-        if (na != nb) {
-            return Integer.compare(na, nb);
+        int cmp = Long.compare(parseVersionSegment(sa), parseVersionSegment(sb));
+        if (cmp != 0) {
+            return cmp;
         }
-        boolean suffixA = hasSuffix(sa);
-        boolean suffixB = hasSuffix(sb);
-        if (suffixA != suffixB) {
-            return suffixA ? -1 : 1;
+        String suffixA = suffix(sa);
+        String suffixB = suffix(sb);
+        if (suffixA.isEmpty() != suffixB.isEmpty()) {
+            return suffixA.isEmpty() ? 1 : -1;
         }
-        return 0;
+        return suffixA.compareTo(suffixB);
     }
 
-    private static boolean hasSuffix(String s) {
+    private static String suffix(String s) {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c < '0' || c > '9') {
-                return true;
+                return s.substring(i);
             }
         }
-        return false;
+        return "";
     }
 
-    private static int parseVersionSegment(String s) {
-        int n = 0;
+    private static long parseVersionSegment(String s) {
+        long n = 0;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c < '0' || c > '9') {

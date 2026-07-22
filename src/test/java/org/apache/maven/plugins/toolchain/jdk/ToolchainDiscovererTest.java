@@ -133,6 +133,20 @@ public class ToolchainDiscovererTest {
         assertEquals("11-ea", list.get(1).getProvides().getProperty("version"));
     }
 
+    @Test
+    void testVersionComparatorSuffixVsSuffix() {
+        ToolchainDiscoverer discoverer = new ToolchainDiscoverer();
+
+        List<ToolchainModel> list = new ArrayList<>();
+        list.add(toolchain("17.0.2+8"));
+        list.add(toolchain("17.0.2+4"));
+
+        list.sort(discoverer.version());
+
+        assertEquals("17.0.2+8", list.get(0).getProvides().getProperty("version"));
+        assertEquals("17.0.2+4", list.get(1).getProvides().getProperty("version"));
+    }
+
     private static ToolchainModel toolchain(String version) {
         ToolchainModel model = new ToolchainModel();
         model.setType("jdk");
