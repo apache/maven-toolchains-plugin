@@ -43,7 +43,7 @@ import org.apache.maven.toolchain.model.io.xpp3.MavenToolchainsXpp3Writer;
 public class GenerateJdkToolchainsXmlMojo extends AbstractMojo {
 
     /**
-     * The path and name pf the toolchain XML file that will be generated.
+     * The path and name of the toolchain XML file that will be generated.
      * If not provided, the XML will be written to the standard output.
      */
     @Parameter(property = "toolchain.file")
