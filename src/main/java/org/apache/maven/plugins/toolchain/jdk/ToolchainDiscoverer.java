@@ -370,23 +370,22 @@ public class ToolchainDiscoverer {
                     String[] b = v2.split("\\.");
                     int length = Math.min(a.length, b.length);
                     for (int i = 0; i < length; i++) {
-                        int oa = parseInt(a[i]);
-                        int ob = parseInt(b[i]);
-                        if (oa != ob) {
-                            return Integer.compare(oa, ob);
+                        String oa = a[i];
+                        String ob = b[i];
+                        if (!Objects.equals(oa, ob)) {
+                            // A null element is less than a non-null element
+                            if (oa == null || ob == null) {
+                                return oa == null ? -1 : 1;
+                            }
+                            int v = oa.compareTo(ob);
+                            if (v != 0) {
+                                return v;
+                            }
                         }
                     }
-                    return Integer.compare(a.length, b.length);
+                    return a.length - b.length;
                 })
                 .reversed();
-    }
-
-    private static int parseInt(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
     }
 
     private Set<Path> findJdks() {
