@@ -84,4 +84,38 @@ public class ToolchainDiscovererTest {
         assertEquals("11", list.get(1).getProvides().getProperty("version"));
         assertEquals("8", list.get(2).getProvides().getProperty("version"));
     }
+
+    @Test
+    void testVersionComparatorMultiPart() {
+        ToolchainDiscoverer discoverer = new ToolchainDiscoverer();
+
+        ToolchainModel v1 = new ToolchainModel();
+        v1.setType("jdk");
+        v1.addProvide("version", "11.0.1");
+
+        ToolchainModel v2 = new ToolchainModel();
+        v2.setType("jdk");
+        v2.addProvide("version", "11.0.31");
+
+        ToolchainModel v3 = new ToolchainModel();
+        v3.setType("jdk");
+        v3.addProvide("version", "17.0.1");
+
+        ToolchainModel v4 = new ToolchainModel();
+        v4.setType("jdk");
+        v4.addProvide("version", "1.8");
+
+        List<ToolchainModel> list = new ArrayList<>();
+        list.add(v1);
+        list.add(v2);
+        list.add(v3);
+        list.add(v4);
+
+        list.sort(discoverer.version());
+
+        assertEquals("17.0.1", list.get(0).getProvides().getProperty("version"));
+        assertEquals("11.0.31", list.get(1).getProvides().getProperty("version"));
+        assertEquals("11.0.1", list.get(2).getProvides().getProperty("version"));
+        assertEquals("1.8", list.get(3).getProvides().getProperty("version"));
+    }
 }
