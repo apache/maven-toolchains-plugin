@@ -121,7 +121,7 @@ mvn toolchains:select-jdk-toolchain -Dtoolchain.jdk.version="[17,)" compile
 
    * <<<env>>> / <<<toolchain.jdk.env>>>: the name of an environment variable that the JDK toolchain must match
 
-  The <<<useJdk>>> can be used to define whether the current JDK can be used if it matches the requirements.
+  The <<<useJdk>>> property controls whether the current JDK is used when it matches the requirements.
 
 * Sorting
 

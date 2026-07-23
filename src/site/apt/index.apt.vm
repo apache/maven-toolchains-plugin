@@ -25,7 +25,7 @@
 
 ${project.name}
 
-  The Toolchains Plugins enables sharing tool configuration across plugins;
+  The Toolchains Plugin enables sharing tool configuration across plugins;
   for example, to make sure that plugins like compiler, surefire, and javadoc all use the same JDK for
   execution, independently from JRE used to run Maven itself.
 
@@ -35,13 +35,13 @@ ${project.name}
   on an internal heuristic which tries to detect JDKs from known locations. Read about the {{{./toolchains/jdk-discovery.html}JDK discovery mechanism}} for more
   information. This mechanism is to be used with the goal:
 
-    * {{{./select-jdk-toolchain-mojo.html}toolchains:select-jdk-toolchain}} discover and selects a matching JDK toolchain.
+    * {{{./select-jdk-toolchain-mojo.html}toolchains:select-jdk-toolchain}} discovers and selects a matching JDK toolchain.
 
   Two associated helper goals are also provided:
 
     * {{{./display-discovered-jdk-toolchains-mojo.html}toolchains:display-discovered-jdk-toolchains}} displays discovered JDK toolchains to the console,
 
-    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format and let user copy/paste.
+    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format and let the user copy and paste.
 
   The previous <<<toolchain>>> goal is still available for JDK and {{{./toolchains/custom.html}other types}} of toolchains:
 
