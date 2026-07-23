@@ -97,8 +97,8 @@ JDK Toolchain discovery mechanism
 
 +---+
 <properties>
-  <toolchain.jdk.version>JAVA17_HOME</toolchain.jdk.version>
-<properties>
+  <toolchain.jdk.env>JAVA17_HOME</toolchain.jdk.env>
+</properties>
 +---+
 
   You can also do everything only at CLI level, without modifying your <<<pom.xml>>>
