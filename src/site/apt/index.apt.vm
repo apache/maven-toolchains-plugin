@@ -41,7 +41,7 @@ ${project.name}
 
     * {{{./display-discovered-jdk-toolchains-mojo.html}toolchains:display-discovered-jdk-toolchains}} displays discovered JDK toolchains to the console,
 
-    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format and let the user copy and paste.
+    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format so the user can copy and paste.
 
   The previous <<<toolchain>>> goal is still available for JDK and {{{./toolchains/custom.html}other types}} of toolchains:
 
