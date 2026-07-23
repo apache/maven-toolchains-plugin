@@ -216,7 +216,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
         if (toolchain == null) {
             throw new MojoFailureException(
                     "Cannot find matching toolchain definitions for the following toolchain types:" + requirements
-                            + System.lineSeparator()
+                            + "\n"
                             + "Define the required toolchains in your ~/.m2/toolchains.xml file.");
         }
 
@@ -262,8 +262,17 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
     }
 
     private String getJdkHome(ToolchainPrivate toolchain) {
-        return ((Xpp3Dom) toolchain.getModel().getConfiguration())
-                .getChild("jdkHome")
-                .getValue();
+        ToolchainModel model = toolchain.getModel();
+        if (model == null) {
+            return null;
+        }
+        Object configuration = model.getConfiguration();
+        if (configuration instanceof Xpp3Dom) {
+            Xpp3Dom child = ((Xpp3Dom) configuration).getChild("jdkHome");
+            if (child != null) {
+                return child.getValue();
+            }
+        }
+        return null;
     }
 }
