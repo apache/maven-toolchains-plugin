@@ -69,9 +69,10 @@ JDK Toolchain discovery mechanism
    * <<<env>>>: set to the comma separated list of <<<JAVA\{xyz\}_HOME>>>> matching environment variables
 
 
-  The <<<select-jdk-toolchain>>> goal finds a matching JDK.
-  The config below allows using the current JDK, or any other discovered JDK >= 17.
-  The current JDK can be kept for speed, but JDK 17 or higher will be used if the current JDK is older than 17:
+  The <<<select-jdk-toolchain>>> goal finds a matching JDK. The config below selects a JDK
+  that satisfies the version range [17,). With the default IfMatch mode, the current JDK is used
+  directly when it meets the requirement (faster). If the current JDK does not satisfy the
+  requirement, a matching discovered JDK is selected instead.
 
 +---+
 <properties>
