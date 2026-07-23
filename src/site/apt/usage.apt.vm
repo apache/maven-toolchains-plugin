@@ -45,7 +45,7 @@ Usage
   With the <<<jdk>>> toolchain, for example, instead of being stuck with the JDK
   used to run Maven, all plugins can use the same other JDK instance without
   hardcoding absolute paths into the <<<pom.xml>>> and without configuring every
-  plugin that require a path to JDK tools.
+  plugin that requires a path to JDK tools.
 
 * The <<<toolchains:toolchain>>> goal
 
