@@ -119,7 +119,7 @@ JDK Toolchain
 
   Aside from version, the values of <<<\<provides\>>>> elements are treated as opaque strings.
   Maven looks in <<<toolchains.xml>>> for a toolchain that provides version=="1.8" and vendor=="temurin".
-  It does not interpret these strings semantically; for example, it does not validate that the jdkHome
+  It does not interpret these strings semantically. For example, it does not validate that the jdkHome
   directory actually contains a JDK matching the declared version and vendor.
 
   All conditions need to be satisfied to find a toolchain.
