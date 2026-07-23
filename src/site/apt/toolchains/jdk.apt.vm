@@ -51,7 +51,7 @@ JDK Toolchain
     <provides>
       <version>11</version>
       <vendor>temurin</vendor>
-      <purpose>for_mevenide</purpose>
+      <purpose>for_maven</purpose>
     </provides>
     <configuration>
       <jdkHome>/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home</jdkHome>
@@ -61,11 +61,11 @@ JDK Toolchain
 </toolchains>
 +---+
 
-  This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
+  This defines a toolchain with version 11, vendor "temurin", and purpose "for_maven".
 
   A project can request this toolchain by specifying the type "jdk" and the version "11".
   It can also use a version range that includes 11 like <<<[8, 17]>>>. It can also ask for the
-  vendor temurin, with or without version, or the purpose "for_mevenide".
+  vendor temurin, with or without version, or the purpose "for_maven".
 
 
 * Toolchains Plugin Configuration
