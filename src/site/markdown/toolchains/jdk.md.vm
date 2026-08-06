@@ -1,50 +1,42 @@
-~~ Licensed to the Apache Software Foundation (ASF) under one
-~~ or more contributor license agreements.  See the NOTICE file
-~~ distributed with this work for additional information
-~~ regarding copyright ownership.  The ASF licenses this file
-~~ to you under the Apache License, Version 2.0 (the
-~~ "License"); you may not use this file except in compliance
-~~ with the License.  You may obtain a copy of the License at
-~~
-~~ http://www.apache.org/licenses/LICENSE-2.0
-~~
-~~ Unless required by applicable law or agreed to in writing,
-~~ software distributed under the License is distributed on an
-~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-~~ KIND, either express or implied.  See the License for the
-~~ specific language governing permissions and limitations
-~~ under the License.    
- 
-  ------
-  JDK Toolchain
-  ------
-  Milos Kleint
-  ------
-  2014-11-02
-  ------
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
-JDK Toolchain
+http://www.apache.org/licenses/LICENSE-2.0
 
-  Note that this page refers to hand-written JDK toolchains in <<<~/.m2/toolchains.xml>>>.  For a simpler setup, look at the {{{./jdk-discovery.html}JDK discovery mechanism}}.
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-* Toolchain Description
+# JDK Toolchain
 
-  The toolchain type id for JDK is "<<<jdk>>>".
- 
-  Predefined <<<\<provides\>>>> identification tokens, for requirement matching in plugin configuration, are:
+Note that this page refers to hand-written JDK toolchains in `~/.m2/toolchains.xml`. For a simpler setup, look at the [JDK discovery mechanism](./jdk-discovery.html).
 
-    * "<<<version>>>" marks the version of the JDK in <<<toolchains.xml>>>. In the plugin configuration, this can be either a single version or a version range.
+Toolchain Description
+---------------------
 
-    * Other tokens are accepted, but only exact matches are supported.
+The toolchain type id for JDK is "`jdk`".
 
-    []
+Predefined `<provides>` identification tokens, for requirement matching in plugin configuration, are:
 
-  In <<<toolchains.xml>>>, the only child of the <<<\<configuration\>>>> element is <<<jdkHome>>>. It designates the root directory
-  of a JDK installation.
+- "`version`" marks the version of the JDK in `toolchains.xml`. In the plugin configuration, this can be either a single version or a version range.
+- Other tokens are accepted, but only exact matches are supported.
 
-* Sample <<<~/.m2/toolchains.xml>>> setup
+In `toolchains.xml`, the only child of the `<configuration>` element is `jdkHome`. It designates the root directory of a JDK installation.
 
-+---+
+Sample `~/.m2/toolchains.xml` setup
+-----------------------------------
+
+```xml
 <toolchains>
   <toolchain>
     <type>jdk</type>
@@ -59,20 +51,18 @@ JDK Toolchain
   </toolchain>
   [...]
 </toolchains>
-+---+
+```
 
-  This defines a toolchain with version 11, vendor "temurin", and purpose "for_mevenide".
+This defines a toolchain with version 11, vendor "temurin", and purpose "for\_mevenide".
 
-  A project can request this toolchain by specifying the type "jdk" and the version "11".
-  It can also use a version range that includes 11 like <<<[8, 17]>>>. It can also ask for the
-  vendor temurin, with or without version, or the purpose "for_mevenide".
+A project can request this toolchain by specifying the type "jdk" and the version "11". It can also use a version range that includes 11 like `[8, 17]`. It can also ask for the vendor temurin, with or without version, or the purpose "for\_mevenide".
 
+Toolchains Plugin Configuration
+-------------------------------
 
-* Toolchains Plugin Configuration
+A project specifies a toolchain in the configuration of the maven-toolchains-plugin like so:
 
-  A project specifies a toolchain in the configuration of the maven-toolchains-plugin like so:
-
-+---+
+```xml
 <project>
   [...]
   <build>
@@ -100,13 +90,11 @@ JDK Toolchain
   </build>
   [...]
 </project>
-+---+
+```
 
-  In this example, the project is requesting any toolchain with type jdk that has a version of 1.8 or greater.
-  "<<<version>>>" accepts any {{{/enforcer/enforcer-rules/versionRanges.html}version range definitions}}.
-  If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configured like this:
+In this example, the project is requesting any toolchain with type jdk that has a version of 1.8 or greater. "`version`" accepts any [version range definitions](/enforcer/enforcer-rules/versionRanges.html). If you want exactly JDK 1.8 from the vendor temurin, the plugin would be configured like this:
 
-+---+
+```xml
         <configuration>
           <toolchains>
             <jdk>
@@ -115,12 +103,8 @@ JDK Toolchain
             </jdk>
           </toolchains>
         </configuration>
-+---+
+```
 
-  Aside from version, the definitions are opaque strings. Maven looks in <<<toolchains.xml>>>
-  for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care
-  what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured
-  by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project,
-  or JDK 21 from Oracle. The JDK toolchain only checks that the directory exists.
+Aside from version, the definitions are opaque strings. Maven looks in `toolchains.xml` for a toolchain that provides version=="1.8" and vendor=="temurin". It does not know or care what these strings mean. It does not, for instance, concern itself with whether the jdkHome configured by the toolchain that satisfies version=="1.8" and vendor=="temurin" is JDK 8 from the Temurin project, or JDK 21 from Oracle. The JDK toolchain only checks that the directory exists.
 
-  All conditions need to be satisfied to find a toolchain.
+All conditions need to be satisfied to find a toolchain.

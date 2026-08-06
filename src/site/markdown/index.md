@@ -1,66 +1,44 @@
-~~ Licensed to the Apache Software Foundation (ASF) under one
-~~ or more contributor license agreements.  See the NOTICE file
-~~ distributed with this work for additional information
-~~ regarding copyright ownership.  The ASF licenses this file
-~~ to you under the Apache License, Version 2.0 (the
-~~ "License"); you may not use this file except in compliance
-~~ with the License.  You may obtain a copy of the License at
-~~
-~~ http://www.apache.org/licenses/LICENSE-2.0
-~~
-~~ Unless required by applicable law or agreed to in writing,
-~~ software distributed under the License is distributed on an
-~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-~~ KIND, either express or implied.  See the License for the
-~~ specific language governing permissions and limitations
-~~ under the License.
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
-  ------
-  Introduction
-  ------
-  Milos Kleint
-  ------
-  2013-07-22
-  ------
+http://www.apache.org/licenses/LICENSE-2.0
 
-${project.name}
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-  The Toolchains Plugin enables sharing tool configuration across plugins;
-  for example, to make sure that plugins like compiler, surefire, and javadoc all use the same JDK for
-  execution, independently from JRE used to run Maven itself.
+# Apache Maven Toolchains Plugin
 
-* Goals Overview
+The Toolchains Plugin enables sharing tool configuration across plugins; for example, to make sure that plugins like compiler, surefire, and javadoc all use the same JDK for execution, independently from JRE used to run Maven itself.
 
-  Since version 3.2.0, a new JDK-specific toolchains mechanism is provided.  This relies on an automatic JDK discovery mechanism based
-  on an internal heuristic which tries to detect JDKs from known locations. Read about the {{{./toolchains/jdk-discovery.html}JDK discovery mechanism}} for more
-  information. This mechanism is to be used with the goal:
+## Goals Overview
 
-    * {{{./select-jdk-toolchain-mojo.html}toolchains:select-jdk-toolchain}} discovers and selects a matching JDK toolchain.
+Since version 3.2.0, a new JDK-specific toolchains mechanism is provided. This relies on an automatic JDK discovery mechanism based on an internal heuristic which tries to detect JDKs from known locations. Read about the [JDK discovery mechanism](./toolchains/jdk-discovery.html) for more information. This mechanism is to be used with the goal:
 
-  Two associated helper goals are also provided:
+- [toolchains:select-jdk-toolchain](./select-jdk-toolchain-mojo.html) discovers and selects a matching JDK toolchain.
 
-    * {{{./display-discovered-jdk-toolchains-mojo.html}toolchains:display-discovered-jdk-toolchains}} displays discovered JDK toolchains to the console,
+Two associated helper goals are also provided:
 
-    * {{{./generate-jdk-toolchains-xml-mojo.html}toolchains:generate-jdk-toolchains-xml}} can be used to generate discovered JDKs in <<<toolchains.xml>>> format so the user can copy and paste.
+- [toolchains:display-discovered-jdk-toolchains](./display-discovered-jdk-toolchains-mojo.html) displays discovered JDK toolchains to the console,
+- [toolchains:generate-jdk-toolchains-xml](./generate-jdk-toolchains-xml-mojo.html) can be used to generate discovered JDKs in `toolchains.xml` format so the user can copy and paste.
 
-  The previous <<<toolchain>>> goal is still available for JDK and {{{./toolchains/custom.html}other types}} of toolchains:
+The previous `toolchain` goal is still available for JDK and [other types](./toolchains/custom.html) of toolchains:
 
-    * {{{./toolchain-mojo.html}toolchains:toolchain}} selects a toolchain from <<<toolchains.xml>>> based on configured build requirements and stores it in build context for later retrieval by other plugins.
+- [toolchains:toolchain](./toolchain-mojo.html) selects a toolchain from `toolchains.xml` based on configured build requirements and stores it in build context for later retrieval by other plugins.
+## Usage
 
-* Usage
+General instructions on how to use the Toolchains Plugin can be found on the [usage page](./usage.html). Additionally, users can contribute to the [GitHub project](https://github.com/apache/maven-toolchains-plugin).
 
-  General instructions on how to use the Toolchains Plugin can be found on the {{{./usage.html}usage page}}.
-  Additionally, users can contribute to the {{{https://github.com/apache/maven-toolchains-plugin}GitHub project}}.
+If you have questions regarding the plugin's usage, contact the [user mailing list](./mailing-lists.html). Posts to the mailing list are archived and could already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching the [mail archive](./mailing-lists.html).
 
-  If you have questions regarding the plugin's usage, 
-  contact the {{{./mailing-lists.html}user mailing list}}. Posts to the mailing list are archived and could
-  already contain the answer to your question as part of an older thread. Hence, it is also worth browsing/searching
-  the {{{./mailing-lists.html}mail archive}}.
-
-  If the plugin is missing a feature or has a defect, you can file a feature request or bug report in our
-  {{{./issue-management.html}issue tracker}}. When creating a new issue, please provide a comprehensive description of your
-  concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason,
-  entire debug logs, POMs, or most preferably little demo projects attached to the issue are very much appreciated.
-  Of course, patches are welcome, too. Contributors can check out the project from our
-  {{{./scm.html}source repository}} and will find supplementary information in the
-  {{{https://maven.apache.org/guides/development/guide-helping.html}guide to helping with Maven}}.
+If the plugin is missing a feature or has a defect, you can file a feature request or bug report in our [issue tracker](./issue-management.html). When creating a new issue, please provide a comprehensive description of your concern. Especially for fixing bugs it is crucial that the developers can reproduce your problem. For this reason, entire debug logs, POMs, or most preferably little demo projects attached to the issue are very much appreciated. Of course, patches are welcome, too. Contributors can check out the project from our [source repository](./scm.html) and will find supplementary information in the [guide to helping with Maven](https://maven.apache.org/guides/development/guide-helping.html).

@@ -1,63 +1,45 @@
-~~ Licensed to the Apache Software Foundation (ASF) under one
-~~ or more contributor license agreements.  See the NOTICE file
-~~ distributed with this work for additional information
-~~ regarding copyright ownership.  The ASF licenses this file
-~~ to you under the Apache License, Version 2.0 (the
-~~ "License"); you may not use this file except in compliance
-~~ with the License.  You may obtain a copy of the License at
-~~
-~~ http://www.apache.org/licenses/LICENSE-2.0
-~~
-~~ Unless required by applicable law or agreed to in writing,
-~~ software distributed under the License is distributed on an
-~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-~~ KIND, either express or implied.  See the License for the
-~~ specific language governing permissions and limitations
-~~ under the License.
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
-  ------
-  Usage
-  ------
-  Milos Kleint
-  Dennis Lundberg
-  ------
-  2014-11-02
-  ------
+http://www.apache.org/licenses/LICENSE-2.0
 
-Usage
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-  Brief examples on how to use the Maven Toolchains Plugin.
+# Usage
 
-* What is a toolchain?
+Brief examples on how to use the Maven Toolchains Plugin.
 
-  A {{{/ref/current/maven-core/apidocs/org/apache/maven/toolchain/Toolchain.html}Toolchain}} is an object that Maven plugins can use to retrieve preconfigured
-  tools (including location and other information).
+What is a toolchain?
+--------------------
 
-  Maven Toolchains Plugin can read which toolchains are available on the user's
-  computer (as configured in <<<~/.m2/toolchains.xml>>>) and match them against the
-  toolchain requirements of the project (as configured in <<<pom.xml>>>). If a
-  match is found, the toolchain is made available to other, <toolchain aware>,
-  Maven plugins in the build.
+A [Toolchain](/ref/current/maven-core/apidocs/org/apache/maven/toolchain/Toolchain.html) is an object that Maven plugins can use to retrieve preconfigured tools (including location and other information).
 
-  A list of which plugins are <toolchain aware> can be found in the
-  {{{/guides/mini/guide-using-toolchains.html}Guide to Using Toolchains}}.
+Maven Toolchains Plugin can read which toolchains are available on the user's computer (as configured in `~/.m2/toolchains.xml`) and match them against the toolchain requirements of the project (as configured in `pom.xml`). If a match is found, the toolchain is made available to other, _toolchain aware_, Maven plugins in the build.
 
-  With the <<<jdk>>> toolchain, for example, instead of being stuck with the JDK
-  used to run Maven, all plugins can use the same other JDK instance without
-  hardcoding absolute paths into the <<<pom.xml>>> and without configuring every
-  plugin that requires a path to JDK tools.
+A list of which plugins are _toolchain aware_ can be found in the [Guide to Using Toolchains](/guides/mini/guide-using-toolchains.html).
 
-* The <<<toolchains:toolchain>>> goal
+With the `jdk` toolchain, for example, instead of being stuck with the JDK used to run Maven, all plugins can use the same other JDK instance without hardcoding absolute paths into the `pom.xml` and without configuring every plugin that requires a path to JDK tools.
 
-  This goal is bound by default to the <<<validate>>> lifecycle phase, the
-  first phase in the lifecycle. This is necessary so that all the plugins that
-  are bound to later lifecycle phases are made aware of the selected
-  toolchain(s).
+The `toolchains:toolchain` goal
+-------------------------------
 
-  That being said, you still need to configure the plugin in your <<<pom.xml>>> to select expected toolchain(s).
-  In order for it to execute, you need to add an execution for it, like this:
+This goal is bound by default to the `validate` lifecycle phase, the first phase in the lifecycle. This is necessary so that all the plugins that are bound to later lifecycle phases are made aware of the selected toolchain(s).
 
-+---+
+That being said, you still need to configure the plugin in your `pom.xml` to select expected toolchain(s). In order for it to execute, you need to add an execution for it, like this:
+
+```xml
 <project>
   <build>
     <plugins>
@@ -84,53 +66,46 @@ Usage
     </plugins>
   </build>
 </project>
-+---+
+```
 
-  You can read more about which standard toolchains are available {{{./toolchains/index.html}here}}.
+You can read more about which standard toolchains are available [here](./toolchains/index.html).
 
-  When executing, output will show toolchain(s) selection, for example:
+When executing, output will show toolchain(s) selection, for example:
 
--------
+```
 [INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
 [INFO] Required toolchain: jdk [ version='11' ]
 [INFO] Found matching toolchain for type jdk: JDK[/opt/jdk-11]
--------
+```
 
-  or fail if no toolchain was found matching expected requirements:
+or fail if no toolchain was found matching expected requirements:
 
--------
+```
 [INFO] --- toolchains:${project.version}:toolchain (default) @ project ---
 [INFO] Required toolchain: jdk [ version='17' ]
 [ERROR] No toolchain matched from 2 found for type jdk
 [ERROR] Cannot find matching toolchain definitions for the following toolchain types:
 jdk [ version='17' ]
--------
+```
 
-* The <<<toolchains.xml>>> Descriptor
+The `toolchains.xml` Descriptor
+-------------------------------
 
-  Toolchains available on the building machine are described in <<<~/.m2/toolchains.xml>>>:
+Toolchains available on the building machine are described in `~/.m2/toolchains.xml`:
 
-  * toolchain <<<\<type\>>>>,
+- toolchain `<type>`,
+- `<provides>` elements to describe toolchain characteristics that can later be matched from plugin, when multiple toolchains for one `type` are available,
+- `<configuration>` elements to configure access the toolchain.
 
-  * <<<\<provides\>>>> elements to describe toolchain characteristics that can later be matched from plugin, when
-  multiple toolchains for one <<<type>>> are available,
+See [Toolchains Descriptor](/ref/current/maven-core/toolchains.html) for details on its structure.
 
-  * <<<\<configuration\>>>> elements to configure access the toolchain.
+You can read more about which elements standard toolchains propose [here](./toolchains/index.html).
 
-  []
+Generic Plugin configuration information
+----------------------------------------
 
-  See {{{/ref/current/maven-core/toolchains.html}Toolchains Descriptor}} for details on its structure.
+See the following links for information about including and configuring plugins in your project:
 
-  You can read more about which elements standard toolchains propose {{{./toolchains/index.html}here}}.
-
-* Generic Plugin configuration information
-
-  See the following links for information about including and configuring plugins in your project:
-
-  * {{{http://maven.apache.org/guides/mini/guide-configuring-plugins.html}Configuring Plugins}}
-
-  * {{{http://maven.apache.org/guides/plugin/guide-java-plugin-development.html}Plugin Development}}
-
-  * {{{http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html}Plugin Prefix}}
-
-   []
+- [Configuring Plugins](http://maven.apache.org/guides/mini/guide-configuring-plugins.html)
+- [Plugin Development](http://maven.apache.org/guides/plugin/guide-java-plugin-development.html)
+- [Plugin Prefix](http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html)
