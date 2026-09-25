@@ -72,12 +72,6 @@ public class ToolchainMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (toolchains == null) {
-            // should not happen since parameter is required...
-            getLog().warn("No toolchains requirements configured.");
-            return;
-        }
-
         List<String> nonMatchedTypes = new ArrayList<>();
 
         for (Map.Entry<String, Map<String, String>> entry :
