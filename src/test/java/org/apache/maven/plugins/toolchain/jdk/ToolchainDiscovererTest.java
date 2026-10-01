@@ -59,6 +59,7 @@ public class ToolchainDiscovererTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
     void testInvalidJdkDoesNotPreventDiscovery(@TempDir Path tempDir) throws IOException {
         Path invalidJdk = tempDir.resolve(".jdks").resolve("invalid-jdk");
         Path bin = invalidJdk.resolve("bin");
