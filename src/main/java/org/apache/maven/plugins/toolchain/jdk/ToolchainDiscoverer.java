@@ -40,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,6 +88,7 @@ public class ToolchainDiscoverer {
     public static final String JAVA_HOME = "java.home";
 
     private static final String COMMA = ",";
+    private static final long JAVA_PROCESS_TIMEOUT_SECONDS = 30;
     public static final String USER_HOME = "user.home";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -276,16 +278,23 @@ public class ToolchainDiscoverer {
         try {
             Path temp = Files.createTempFile("jdk-opts-", ".out");
             try {
-                new ProcessBuilder()
+                Process process = new ProcessBuilder()
                         .command(java.toString(), "-XshowSettings:properties", "-version")
                         .redirectError(temp.toFile())
-                        .start()
-                        .waitFor();
+                        .start();
+                if (!process.waitFor(JAVA_PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    process.destroyForcibly();
+                    log.debug("JDK toolchain discovered at " + jdk + " will be ignored: java process timed out");
+                    return null;
+                }
                 lines = Files.readAllLines(temp);
             } finally {
                 Files.delete(temp);
             }
         } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             log.debug("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
             return null;
         }
