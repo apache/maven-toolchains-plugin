@@ -19,33 +19,30 @@
 package org.apache.maven.plugins.toolchain;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-/**
- * Type for plugin's <code>toolchain</code> attribute representing toolchains requirements.
- *
- * @author mkleint
- * @see ToolchainConverter the custom Plexus converter to instantiate this class
- */
-public final class ToolchainsRequirement {
-    Map<String, Map<String, String>> toolchains;
+import org.junit.jupiter.api.Test;
 
-    public Map<String, Map<String, String>> getToolchains() {
-        return Collections.unmodifiableMap(toolchains);
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ToolchainsRequirementTest {
+    @Test
+    void returnsEmptyParamsForUnknownType() {
+        ToolchainsRequirement requirement = new ToolchainsRequirement();
+        Map<String, Map<String, String>> toolchains = new HashMap<>();
+        toolchains.put("jdk", Collections.singletonMap("version", "17"));
+        requirement.toolchains = toolchains;
+
+        assertEquals(Collections.emptyMap(), requirement.getParams("nonexistent"));
     }
 
-    public Set<String> getToolchainsTypes() {
-        return Collections.unmodifiableSet(toolchains.keySet());
-    }
+    @Test
+    void returnsConfiguredParamsForKnownType() {
+        ToolchainsRequirement requirement = new ToolchainsRequirement();
+        Map<String, String> params = Collections.singletonMap("version", "17");
+        requirement.toolchains = Collections.singletonMap("jdk", params);
 
-    public Map<String, String> getParams(String type) {
-        Map<String, String> params = toolchains.get(type);
-        return params == null ? Collections.emptyMap() : Collections.unmodifiableMap(params);
-    }
-
-    @Override
-    public String toString() {
-        return "ToolchainsRequirement{toolchains=" + toolchains + '}';
+        assertEquals(params, requirement.getParams("jdk"));
     }
 }
