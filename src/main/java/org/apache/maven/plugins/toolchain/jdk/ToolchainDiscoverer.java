@@ -314,11 +314,15 @@ public class ToolchainDiscoverer {
         return model;
     }
 
-    private static Path getCanonicalPath(Path path) {
+    static Path getCanonicalPath(Path path) {
         try {
             return path.toRealPath();
         } catch (IOException e) {
-            return getCanonicalPath(path.getParent()).resolve(path.getFileName());
+            Path parent = path.getParent();
+            if (parent == null) {
+                return path.toAbsolutePath().normalize();
+            }
+            return getCanonicalPath(parent).resolve(path.getFileName());
         }
     }
 
