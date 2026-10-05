@@ -169,6 +169,7 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
 
     private void doExecute() throws MisconfiguredToolchainException, MojoFailureException {
         if (version == null && runtimeName == null && runtimeVersion == null && vendor == null && env == null) {
+            getLog().warn("No JDK toolchain requirements configured.");
             return;
         }
 
