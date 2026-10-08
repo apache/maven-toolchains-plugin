@@ -92,6 +92,7 @@ public class ToolchainDiscoverer {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private volatile Map<Path, ToolchainModel> cache;
+    private final Object cacheLock = new Object();
     private volatile boolean cacheModified;
     private volatile Set<Path> foundJdks;
 
@@ -209,28 +210,42 @@ public class ToolchainDiscoverer {
     }
 
     private synchronized void writeCache() {
-        if (cacheModified) {
-            try {
-                Path cacheFile = getCacheFile();
-                Files.createDirectories(cacheFile.getParent());
-                try (Writer w = Files.newBufferedWriter(cacheFile)) {
-                    PersistedToolchains pt = new PersistedToolchains();
-                    pt.setToolchains(cache.values().stream()
-                            .map(tc -> {
-                                ToolchainModel model = tc.clone();
-                                // Remove transient information
-                                model.getProvides().remove(CURRENT);
-                                model.getProvides().remove(ENV);
-                                return model;
-                            })
-                            .sorted(version().thenComparing(vendor()))
-                            .collect(Collectors.toList()));
-                    new MavenToolchainsXpp3Writer().write(w, pt);
-                }
-            } catch (IOException e) {
-                log.debug("Error writing toolchains cache: " + e, e);
+        Map<Path, ToolchainModel> cacheSnapshot;
+        synchronized (cacheLock) {
+            if (!cacheModified) {
+                return;
             }
             cacheModified = false;
+            cacheSnapshot = new HashMap<>(cache);
+        }
+
+        boolean persisted = false;
+        try {
+            Path cacheFile = getCacheFile();
+            Files.createDirectories(cacheFile.getParent());
+            try (Writer w = Files.newBufferedWriter(cacheFile)) {
+                PersistedToolchains pt = new PersistedToolchains();
+                pt.setToolchains(cacheSnapshot.values().stream()
+                        .map(tc -> {
+                            ToolchainModel model = tc.clone();
+                            // Remove transient information
+                            model.getProvides().remove(CURRENT);
+                            model.getProvides().remove(ENV);
+                            return model;
+                        })
+                        .sorted(version().thenComparing(vendor()))
+                        .collect(Collectors.toList()));
+                new MavenToolchainsXpp3Writer().write(w, pt);
+            }
+            persisted = true;
+        } catch (IOException e) {
+            log.debug("Error writing toolchains cache: " + e, e);
+        } finally {
+            if (!persisted) {
+                synchronized (cacheLock) {
+                    cacheModified = true;
+                }
+            }
         }
     }
 
@@ -239,8 +254,15 @@ public class ToolchainDiscoverer {
         if (model == null) {
             model = doGetToolchainModel(jdk);
             if (model != null) {
-                cache.put(jdk, model);
-                cacheModified = true;
+                synchronized (cacheLock) {
+                    ToolchainModel cached = cache.get(jdk);
+                    if (cached == null) {
+                        cache.put(jdk, model);
+                        cacheModified = true;
+                    } else {
+                        model = cached;
+                    }
+                }
             }
         }
         return model;
