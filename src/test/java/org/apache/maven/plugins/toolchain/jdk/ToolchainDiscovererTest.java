@@ -18,6 +18,9 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import java.io.File;
+import java.nio.file.Paths;
+
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,5 +54,10 @@ public class ToolchainDiscovererTest {
 
         assertTrue(persistedToolchains.getToolchains().stream()
                 .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
+    }
+
+    @Test
+    void testCanonicalPathHandlesRootPath() {
+        assertDoesNotThrow(() -> ToolchainDiscoverer.getCanonicalPath(Paths.get(File.separator)));
     }
 }
