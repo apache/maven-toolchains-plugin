@@ -149,19 +149,7 @@ public class ToolchainDiscoverer {
                         f.put(ENV, (val.isEmpty() ? "" : val + ",") + e.getKey());
                     });
 
-            List<ToolchainModel> tcs = jdks.parallelStream()
-                    .map(s -> {
-                        ToolchainModel tc = getToolchainModel(s);
-                        flags.getOrDefault(s, Collections.emptyMap())
-                                .forEach((k, v) -> tc.getProvides().setProperty(k, v));
-                        String version = tc.getProvides().getProperty(VERSION);
-                        if (isLts(version)) {
-                            tc.getProvides().setProperty(LTS, "true");
-                        }
-                        return tc;
-                    })
-                    .sorted(getToolchainModelComparator(comparator))
-                    .collect(Collectors.toList());
+            List<ToolchainModel> tcs = discoverToolchainModels(jdks, flags, comparator);
             writeCache();
             PersistedToolchains ps = new PersistedToolchains();
             ps.setToolchains(tcs);
@@ -174,6 +162,27 @@ public class ToolchainDiscoverer {
             }
             return new PersistedToolchains();
         }
+    }
+
+    List<ToolchainModel> discoverToolchainModels(
+            Set<Path> jdks, Map<Path, Map<String, String>> flags, String comparator) {
+        return jdks.parallelStream()
+                .map(s -> {
+                    ToolchainModel tc = getToolchainModel(s);
+                    if (tc == null) {
+                        return null;
+                    }
+                    flags.getOrDefault(s, Collections.emptyMap())
+                            .forEach((k, v) -> tc.getProvides().setProperty(k, v));
+                    String version = tc.getProvides().getProperty(VERSION);
+                    if (isLts(version)) {
+                        tc.getProvides().setProperty(LTS, "true");
+                    }
+                    return tc;
+                })
+                .filter(Objects::nonNull)
+                .sorted(getToolchainModelComparator(comparator))
+                .collect(Collectors.toList());
     }
 
     private static boolean isLts(String version) {
@@ -284,7 +293,7 @@ public class ToolchainDiscoverer {
                         .start();
                 if (!process.waitFor(JAVA_PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                     process.destroyForcibly();
-                    log.debug("JDK toolchain discovered at " + jdk + " will be ignored: java process timed out");
+                    log.warn("JDK toolchain discovered at " + jdk + " will be ignored: java process timed out");
                     return null;
                 }
                 lines = Files.readAllLines(temp);
