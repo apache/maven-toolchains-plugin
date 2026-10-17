@@ -47,7 +47,6 @@ import org.apache.maven.toolchain.ToolchainPrivate;
         configurator = "toolchains-requirement-configurator",
         threadSafe = true)
 public class ToolchainMojo extends AbstractMojo {
-    private static final Object LOCK = new Object();
 
     private final ToolchainManagerPrivate toolchainManagerPrivate;
 
@@ -147,9 +146,7 @@ public class ToolchainMojo extends AbstractMojo {
                     getLog().info("Found matching toolchain for type " + type + ": " + tc);
 
                     // store matching toolchain to build context
-                    synchronized (LOCK) {
-                        toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
-                    }
+                    toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
 
                     return true;
                 }
