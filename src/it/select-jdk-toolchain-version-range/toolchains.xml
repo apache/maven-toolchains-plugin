@@ -26,7 +26,7 @@ under the License.
       <vendor>test-vendor</vendor>
     </provides>
     <configuration>
-      <jdkHome>/usr/lib/jvm/default-java</jdkHome>
+      <jdkHome>/usr/local/sdkman/candidates/java/current</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>

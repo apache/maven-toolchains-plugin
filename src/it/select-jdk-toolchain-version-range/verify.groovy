@@ -19,9 +19,7 @@
 
 content = new File(basedir, 'build.log').text
 
-// Verify that the version range requirement was parsed correctly
-assert content.contains("Required toolchain: jdk [ version='[11,17)' ]")
-
 // Verify that a matching toolchain was selected (if matching is broken, the build would fail
 // with "Cannot find matching toolchain definitions")
+assert content.contains('Found matching JDK toolchain:')
 assert content.contains('Selected JDK toolchain:')

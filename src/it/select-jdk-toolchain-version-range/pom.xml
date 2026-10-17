@@ -30,6 +30,9 @@ under the License.
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <toolchain.jdk.version>[11,17)</toolchain.jdk.version>
+    <toolchain.jdk.discover>false</toolchain.jdk.discover>
+    <toolchain.jdk.mode>Never</toolchain.jdk.mode>
   </properties>
 
   <build>
