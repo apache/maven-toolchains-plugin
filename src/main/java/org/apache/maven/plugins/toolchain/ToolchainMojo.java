@@ -48,8 +48,6 @@ import org.apache.maven.toolchain.ToolchainPrivate;
         threadSafe = true)
 public class ToolchainMojo extends AbstractMojo {
 
-    private static final Object LOCK = new Object();
-
     private final ToolchainManagerPrivate toolchainManagerPrivate;
 
     /**
