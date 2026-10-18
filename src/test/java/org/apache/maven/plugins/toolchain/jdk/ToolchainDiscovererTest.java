@@ -18,6 +18,12 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
@@ -27,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,5 +58,30 @@ public class ToolchainDiscovererTest {
 
         assertTrue(persistedToolchains.getToolchains().stream()
                 .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
+    }
+
+    @Test
+    void testCanonicalPathHandlesRootPath() {
+        assertDoesNotThrow(() -> ToolchainDiscoverer.getCanonicalPath(Paths.get(File.separator)));
+    }
+
+    @Test
+    void testCanonicalPathFallsBackWhenRootCannotBeResolved() {
+        Path root = (Path) Proxy.newProxyInstance(
+                Path.class.getClassLoader(), new Class<?>[] {Path.class}, (proxy, method, args) -> {
+                    if ("toRealPath".equals(method.getName())) {
+                        throw new IOException("simulated root resolution failure");
+                    }
+                    if ("getParent".equals(method.getName())) {
+                        return null;
+                    }
+                    if ("toAbsolutePath".equals(method.getName())) {
+                        return Paths.get(File.separator);
+                    }
+                    throw new UnsupportedOperationException(method.getName());
+                });
+
+        assertEquals(
+                Paths.get(File.separator).toAbsolutePath().normalize(), ToolchainDiscoverer.getCanonicalPath(root));
     }
 }
