@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -68,9 +68,7 @@ public class ToolchainDiscovererTest {
     @Test
     void testCanonicalPathFallsBackWhenRootCannotBeResolved() {
         Path root = (Path) Proxy.newProxyInstance(
-                Path.class.getClassLoader(),
-                new Class<?>[] {Path.class},
-                (proxy, method, args) -> {
+                Path.class.getClassLoader(), new Class<?>[] {Path.class}, (proxy, method, args) -> {
                     if ("toRealPath".equals(method.getName())) {
                         throw new IOException("simulated root resolution failure");
                     }
@@ -83,7 +81,7 @@ public class ToolchainDiscovererTest {
                     throw new UnsupportedOperationException(method.getName());
                 });
 
-        assertEquals(Paths.get(File.separator).toAbsolutePath().normalize(),
-                ToolchainDiscoverer.getCanonicalPath(root));
+        assertEquals(
+                Paths.get(File.separator).toAbsolutePath().normalize(), ToolchainDiscoverer.getCanonicalPath(root));
     }
 }
