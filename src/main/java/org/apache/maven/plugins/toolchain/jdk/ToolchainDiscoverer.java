@@ -224,8 +224,8 @@ public class ToolchainDiscoverer {
             Path cacheFile = getCacheFile();
             Files.createDirectories(cacheFile.getParent());
             try (Writer writer = Files.newBufferedWriter(cacheFile)) {
-                PersistedToolchains pt = new PersistedToolchains();
-                pt.setToolchains(cacheSnapshot.values().stream()
+                PersistedToolchains persistedToolchains = new PersistedToolchains();
+                persistedToolchains.setToolchains(cacheSnapshot.values().stream()
                         .map(tc -> {
                             ToolchainModel model = tc.clone();
                             // Remove transient information
@@ -235,7 +235,7 @@ public class ToolchainDiscoverer {
                         })
                         .sorted(version().thenComparing(vendor()))
                         .collect(Collectors.toList()));
-                new MavenToolchainsXpp3Writer().write(writer, pt);
+                new MavenToolchainsXpp3Writer().write(writer, persistedToolchains);
             }
             persisted = true;
         } catch (IOException e) {
