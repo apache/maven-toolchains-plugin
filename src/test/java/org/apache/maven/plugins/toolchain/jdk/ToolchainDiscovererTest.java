@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -75,13 +77,14 @@ public class ToolchainDiscovererTest {
         String originalUserHome = System.getProperty(ToolchainDiscoverer.USER_HOME);
         System.setProperty(ToolchainDiscoverer.USER_HOME, temporaryDirectory.toString());
         try {
-            ConcurrentHashMap<Path, ToolchainModel> cache = new ConcurrentHashMap<>();
-            TestToolchainDiscoverer discoverer = new TestToolchainDiscoverer();
+            BlockingCache cache = new BlockingCache();
+            TestToolchainDiscoverer discoverer = new TestToolchainDiscoverer(cache);
             setField(discoverer, "cache", cache);
 
             Path firstJdk = temporaryDirectory.resolve("jdk-1");
             Path secondJdk = temporaryDirectory.resolve("jdk-2");
             discoverer.getToolchainModel(firstJdk);
+            cache.blockNextSnapshot();
             discoverer.firstModel.blockNextClone();
 
             AtomicReference<Throwable> writerFailure = new AtomicReference<>();
@@ -96,8 +99,7 @@ public class ToolchainDiscovererTest {
             });
             writer.start();
 
-            assertTrue(
-                    discoverer.firstModel.snapshotStarted.await(10, TimeUnit.SECONDS), "cache snapshot did not start");
+            assertTrue(cache.snapshotStarted.await(10, TimeUnit.SECONDS), "cache snapshot did not start");
             Thread updater = new Thread(() -> {
                 try {
                     discoverer.getToolchainModel(secondJdk);
@@ -109,7 +111,7 @@ public class ToolchainDiscovererTest {
             });
             updater.start();
             assertTrue(updaterFinished.await(10, TimeUnit.SECONDS), "cache update did not finish");
-            discoverer.firstModel.allowSnapshot.countDown();
+            cache.allowSnapshot.countDown();
             writer.join(TimeUnit.SECONDS.toMillis(10));
             updater.join(TimeUnit.SECONDS.toMillis(10));
 
@@ -159,22 +161,63 @@ public class ToolchainDiscovererTest {
     }
 
     private static final class TestToolchainDiscoverer extends ToolchainDiscoverer {
+        private final BlockingCache cache;
         private BlockingToolchainModel firstModel;
+
+        private TestToolchainDiscoverer(BlockingCache cache) {
+            this.cache = cache;
+        }
 
         @Override
         ToolchainModel doGetToolchainModel(Path jdk) {
             if ("jdk-1".equals(jdk.getFileName().toString())) {
-                firstModel = blockingToolchain(jdk, jdk.getFileName().toString());
+                firstModel = blockingToolchain(cache, jdk, jdk.getFileName().toString());
                 return firstModel;
             }
             return toolchain(jdk, jdk.getFileName().toString());
         }
     }
 
-    private static final class BlockingToolchainModel extends ToolchainModel {
-        private final AtomicBoolean blockNextClone = new AtomicBoolean();
+    private static final class BlockingCache extends ConcurrentHashMap<Path, ToolchainModel> {
+        private final AtomicBoolean blockNextSnapshot = new AtomicBoolean();
+        private final AtomicBoolean originalSnapshotCaptured = new AtomicBoolean();
         private final CountDownLatch snapshotStarted = new CountDownLatch(1);
         private final CountDownLatch allowSnapshot = new CountDownLatch(1);
+
+        void blockNextSnapshot() {
+            blockNextSnapshot.set(true);
+        }
+
+        @Override
+        public Collection<ToolchainModel> values() {
+            Collection<ToolchainModel> snapshot = new ArrayList<>(super.values());
+            if (blockNextSnapshot.compareAndSet(true, false)) {
+                originalSnapshotCaptured.set(true);
+                awaitSnapshotRelease();
+            }
+            return snapshot;
+        }
+
+        private void awaitSnapshotRelease() {
+            snapshotStarted.countDown();
+            try {
+                if (!allowSnapshot.await(10, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("timed out waiting to resume cache snapshot");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("interrupted while waiting to resume cache snapshot", e);
+            }
+        }
+    }
+
+    private static final class BlockingToolchainModel extends ToolchainModel {
+        private final BlockingCache cache;
+        private final AtomicBoolean blockNextClone = new AtomicBoolean();
+
+        private BlockingToolchainModel(BlockingCache cache) {
+            this.cache = cache;
+        }
 
         void blockNextClone() {
             blockNextClone.set(true);
@@ -182,23 +225,15 @@ public class ToolchainDiscovererTest {
 
         @Override
         public ToolchainModel clone() {
-            if (blockNextClone.compareAndSet(true, false)) {
-                snapshotStarted.countDown();
-                try {
-                    if (!allowSnapshot.await(10, TimeUnit.SECONDS)) {
-                        throw new IllegalStateException("timed out waiting to resume cache snapshot");
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("interrupted while waiting to resume cache snapshot", e);
-                }
+            if (!cache.originalSnapshotCaptured.get() && blockNextClone.compareAndSet(true, false)) {
+                cache.awaitSnapshotRelease();
             }
             return super.clone();
         }
     }
 
-    private static BlockingToolchainModel blockingToolchain(Path jdk, String version) {
-        BlockingToolchainModel model = new BlockingToolchainModel();
+    private static BlockingToolchainModel blockingToolchain(BlockingCache cache, Path jdk, String version) {
+        BlockingToolchainModel model = new BlockingToolchainModel(cache);
         model.setType("jdk");
         model.addProvide(VERSION, version);
         Xpp3Dom configuration = new Xpp3Dom("configuration");
