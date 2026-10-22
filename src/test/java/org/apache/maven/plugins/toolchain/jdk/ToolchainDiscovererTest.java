@@ -18,7 +18,17 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.maven.toolchain.model.PersistedToolchains;
+import org.apache.maven.toolchain.model.ToolchainModel;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
@@ -27,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
+import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VERSION;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,5 +62,28 @@ public class ToolchainDiscovererTest {
 
         assertTrue(persistedToolchains.getToolchains().stream()
                 .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
+    }
+
+    @Test
+    void timedOutJdkDoesNotDiscardHealthyToolchains() {
+        ToolchainDiscoverer discoverer = new ToolchainDiscoverer() {
+            @Override
+            ToolchainModel getToolchainModel(Path jdk) {
+                if ("timed-out".equals(jdk.getFileName().toString())) {
+                    return null;
+                }
+                ToolchainModel model = new ToolchainModel();
+                model.setType("jdk");
+                model.addProvide(VERSION, "21");
+                return model;
+            }
+        };
+        Set<Path> jdks = new HashSet<>(Arrays.asList(Paths.get("healthy"), Paths.get("timed-out")));
+        Map<Path, Map<String, String>> flags = Collections.emptyMap();
+
+        List<ToolchainModel> models = discoverer.discoverToolchainModels(jdks, flags, VERSION);
+
+        assertEquals(1, models.size());
+        assertEquals("21", models.get(0).getProvides().getProperty(VERSION));
     }
 }
