@@ -304,7 +304,7 @@ public class ToolchainDiscoverer {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
+            log.warn("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
             return null;
         }
 
