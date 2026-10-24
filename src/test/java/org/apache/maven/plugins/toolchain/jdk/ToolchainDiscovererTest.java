@@ -18,6 +18,7 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -242,5 +243,27 @@ public class ToolchainDiscovererTest {
         configuration.addChild(jdkHome);
         model.setConfiguration(configuration);
         return model;
+    }
+
+    @Test
+    @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
+    void testInvalidJdkDoesNotPreventDiscovery(@TempDir Path tempDir) throws IOException {
+        Path invalidJdk = tempDir.resolve(".jdks").resolve("invalid-jdk");
+        Path bin = invalidJdk.resolve("bin");
+        Files.createDirectories(bin);
+        Path java = bin.resolve("java");
+        Files.write(java, "#!/bin/sh\nexit 0\n".getBytes(StandardCharsets.UTF_8));
+        Files.write(bin.resolve("javac"), new byte[0]);
+        java.toFile().setExecutable(true);
+
+        String originalUserHome = System.getProperty(ToolchainDiscoverer.USER_HOME);
+        System.setProperty(ToolchainDiscoverer.USER_HOME, tempDir.toString());
+        try {
+            PersistedToolchains toolchains = new ToolchainDiscoverer().discoverToolchains();
+            assertTrue(toolchains.getToolchains().stream()
+                    .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
+        } finally {
+            System.setProperty(ToolchainDiscoverer.USER_HOME, originalUserHome);
+        }
     }
 }

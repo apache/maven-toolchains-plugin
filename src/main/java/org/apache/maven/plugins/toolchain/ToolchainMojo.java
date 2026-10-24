@@ -47,7 +47,6 @@ import org.apache.maven.toolchain.ToolchainPrivate;
         configurator = "toolchains-requirement-configurator",
         threadSafe = true)
 public class ToolchainMojo extends AbstractMojo {
-    private static final Object LOCK = new Object();
 
     private final ToolchainManagerPrivate toolchainManagerPrivate;
 
@@ -75,12 +74,6 @@ public class ToolchainMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (toolchains == null) {
-            // should not happen since parameter is required...
-            getLog().warn("No toolchains requirements configured.");
-            return;
-        }
-
         List<String> nonMatchedTypes = new ArrayList<>();
 
         for (Map.Entry<String, Map<String, String>> entry :
@@ -147,9 +140,7 @@ public class ToolchainMojo extends AbstractMojo {
                     getLog().info("Found matching toolchain for type " + type + ": " + tc);
 
                     // store matching toolchain to build context
-                    synchronized (LOCK) {
-                        toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
-                    }
+                    toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
 
                     return true;
                 }
