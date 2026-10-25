@@ -167,10 +167,10 @@ public class ToolchainDiscoverer {
     List<ToolchainModel> discoverToolchainModels(
             Set<Path> jdks, Map<Path, Map<String, String>> flags, String comparator) {
         return jdks.parallelStream()
-                .map(s -> {
+                .flatMap(s -> {
                     ToolchainModel tc = getToolchainModel(s);
                     if (tc == null) {
-                        return null;
+                        return Stream.empty();
                     }
                     flags.getOrDefault(s, Collections.emptyMap())
                             .forEach((k, v) -> tc.getProvides().setProperty(k, v));
@@ -178,9 +178,8 @@ public class ToolchainDiscoverer {
                     if (isLts(version)) {
                         tc.getProvides().setProperty(LTS, "true");
                     }
-                    return tc;
+                    return Stream.of(tc);
                 })
-                .filter(Objects::nonNull)
                 .sorted(getToolchainModelComparator(comparator))
                 .collect(Collectors.toList());
     }
