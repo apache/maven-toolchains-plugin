@@ -148,15 +148,18 @@ public class ToolchainDiscoverer {
                     });
 
             List<ToolchainModel> tcs = jdks.parallelStream()
-                    .map(s -> {
+                    .flatMap(s -> {
                         ToolchainModel tc = getToolchainModel(s);
+                        if (tc == null) {
+                            return Stream.empty();
+                        }
                         flags.getOrDefault(s, Collections.emptyMap())
                                 .forEach((k, v) -> tc.getProvides().setProperty(k, v));
                         String version = tc.getProvides().getProperty(VERSION);
                         if (isLts(version)) {
                             tc.getProvides().setProperty(LTS, "true");
                         }
-                        return tc;
+                        return Stream.of(tc);
                     })
                     .sorted(getToolchainModelComparator(comparator))
                     .collect(Collectors.toList());

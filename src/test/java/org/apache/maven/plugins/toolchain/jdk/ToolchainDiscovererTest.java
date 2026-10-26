@@ -21,6 +21,8 @@ package org.apache.maven.plugins.toolchain.jdk;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -29,6 +31,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,5 +86,27 @@ public class ToolchainDiscovererTest {
 
         assertEquals(
                 Paths.get(File.separator).toAbsolutePath().normalize(), ToolchainDiscoverer.getCanonicalPath(root));
+    }
+
+    @Test
+    @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
+    void testInvalidJdkDoesNotPreventDiscovery(@TempDir Path tempDir) throws IOException {
+        Path invalidJdk = tempDir.resolve(".jdks").resolve("invalid-jdk");
+        Path bin = invalidJdk.resolve("bin");
+        Files.createDirectories(bin);
+        Path java = bin.resolve("java");
+        Files.write(java, "#!/bin/sh\nexit 0\n".getBytes(StandardCharsets.UTF_8));
+        Files.write(bin.resolve("javac"), new byte[0]);
+        java.toFile().setExecutable(true);
+
+        String originalUserHome = System.getProperty(ToolchainDiscoverer.USER_HOME);
+        System.setProperty(ToolchainDiscoverer.USER_HOME, tempDir.toString());
+        try {
+            PersistedToolchains toolchains = new ToolchainDiscoverer().discoverToolchains();
+            assertTrue(toolchains.getToolchains().stream()
+                    .anyMatch(tc -> tc.getProvides().containsKey(CURRENT)));
+        } finally {
+            System.setProperty(ToolchainDiscoverer.USER_HOME, originalUserHome);
+        }
     }
 }

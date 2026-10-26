@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.toolchain;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -46,12 +47,8 @@ import org.apache.maven.toolchain.ToolchainPrivate;
         configurator = "toolchains-requirement-configurator",
         threadSafe = true)
 public class ToolchainMojo extends AbstractMojo {
-    private static final Object LOCK = new Object();
 
-    /**
-     */
-    @Component
-    private ToolchainManagerPrivate toolchainManagerPrivate;
+    private final ToolchainManagerPrivate toolchainManagerPrivate;
 
     /**
      * The current build session instance. This is used for toolchain manager API calls.
@@ -70,14 +67,13 @@ public class ToolchainMojo extends AbstractMojo {
     @Parameter(required = true)
     private ToolchainsRequirement toolchains;
 
+    @Inject
+    public ToolchainMojo(ToolchainManagerPrivate toolchainManagerPrivate) {
+        this.toolchainManagerPrivate = toolchainManagerPrivate;
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (toolchains == null) {
-            // should not happen since parameter is required...
-            getLog().warn("No toolchains requirements configured.");
-            return;
-        }
-
         List<String> nonMatchedTypes = new ArrayList<>();
 
         for (Map.Entry<String, Map<String, String>> entry :
@@ -144,9 +140,7 @@ public class ToolchainMojo extends AbstractMojo {
                     getLog().info("Found matching toolchain for type " + type + ": " + tc);
 
                     // store matching toolchain to build context
-                    synchronized (LOCK) {
-                        toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
-                    }
+                    toolchainManagerPrivate.storeToolchainToBuildContext(tc, session);
 
                     return true;
                 }
