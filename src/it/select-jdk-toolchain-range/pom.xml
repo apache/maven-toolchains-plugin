@@ -30,6 +30,7 @@ under the License.
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <toolchain.jdk.version>[8,17]</toolchain.jdk.version>
   </properties>
 
   <build>
@@ -41,7 +42,7 @@ under the License.
         <configuration>
           <toolchains>
             <jdk>
-              <version>[8,17]</version>
+              <version>${toolchain.jdk.version}</version>
             </jdk>
           </toolchains>
         </configuration>

@@ -18,10 +18,12 @@
  */
 package org.apache.maven.plugins.toolchain;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.AbstractConfigurationConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
@@ -34,6 +36,8 @@ import org.codehaus.plexus.configuration.PlexusConfiguration;
  * @author mkleint
  * @see ToolchainsRequirement
  */
+@Named("ToolchainsRequirement")
+@Singleton
 public class ToolchainConverter extends AbstractConfigurationConverter {
 
     /**
@@ -55,20 +59,13 @@ public class ToolchainConverter extends AbstractConfigurationConverter {
             Class baseType,
             ClassLoader classLoader,
             ExpressionEvaluator expressionEvaluator,
-            ConfigurationListener listener)
-            throws ComponentConfigurationException {
+            ConfigurationListener listener) {
         ToolchainsRequirement retValue = new ToolchainsRequirement();
-
-        processConfiguration(retValue, configuration, expressionEvaluator);
-
+        processConfiguration(retValue, configuration);
         return retValue;
     }
 
-    private void processConfiguration(
-            ToolchainsRequirement requirement,
-            PlexusConfiguration configuration,
-            ExpressionEvaluator expressionEvaluator)
-            throws ComponentConfigurationException {
+    private void processConfiguration(ToolchainsRequirement requirement, PlexusConfiguration configuration) {
         Map<String, Map<String, String>> map = new HashMap<>();
 
         PlexusConfiguration[] tools = configuration.getChildren();
