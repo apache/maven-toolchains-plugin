@@ -67,7 +67,6 @@ under the License.
   </distributionManagement>
 
   <properties>
-    <javaVersion>8</javaVersion>
     <mavenVersion>3.10.0</mavenVersion>
     <project.build.outputTimestamp>2026-07-21T21:48:43Z</project.build.outputTimestamp>
     <!-- property used in src/it/select-jdk-env-multi/invoker.properties -->
