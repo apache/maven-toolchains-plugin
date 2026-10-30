@@ -71,7 +71,7 @@ public class ToolchainMojo extends AbstractMojo {
      * Flag to fail the build if toolchain requirements not met.
      * @since 3.0.1
      */
-    @Parameter( defaultValue = "true" )
+    @Parameter(defaultValue = "true")
     private boolean fail;
 
     @Inject
@@ -102,16 +102,13 @@ public class ToolchainMojo extends AbstractMojo {
                 buff.append(getToolchainRequirementAsString(type, toolchains.getParams(type)));
             }
 
-            if ( fail )
-            {
+            if (fail) {
                 getLog().error(buff.toString());
 
                 throw new MojoFailureException(buff.toString() + System.lineSeparator()
-                    + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file.");
-            }
-            else
-            {
-                getLog().warn( buff.toString() );
+                        + "Please make sure you define the required toolchains in your ~/.m2/toolchains.xml file.");
+            } else {
+                getLog().warn(buff.toString());
             }
         }
     }
