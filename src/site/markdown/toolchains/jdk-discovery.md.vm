@@ -30,7 +30,7 @@ Since version 3.2.0, the plugin provides a heuristic to discover installed JDK t
 
 The list of discovered toolchains can be easily displayed using the command `mvn org.apache.maven.plugins:maven-toolchains-plugin:${project.version}:display-discovered-jdk-toolchains`. This will print something like:
 
-```unknown
+```text
 [INFO] Discovered 10 JDK toolchains:
 [INFO]   - /Users/gnodet/.sdkman/candidates/java/21.0.2-graalce
 [INFO]     provides:
