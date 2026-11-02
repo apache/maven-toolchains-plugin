@@ -63,7 +63,7 @@ The `select-jdk-toolchain` goal finds a matching JDK. The config below selects a
 ```xml
 <properties>
   <toolchain.jdk.version>[17,)</toolchain.jdk.version>
-<properties>
+</properties>
 
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>
@@ -83,8 +83,8 @@ If you use environment variables to configure your JDKs, you can use the followi
 
 ```xml
 <properties>
-  <toolchain.jdk.version>JAVA17_HOME</toolchain.jdk.version>
-<properties>
+  <toolchain.jdk.env>JAVA17_HOME</toolchain.jdk.env>
+</properties>
 ```
 
 You can also do everything only at CLI level, without modifying your `pom.xml`
