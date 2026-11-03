@@ -29,6 +29,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.maven.toolchain.model.PersistedToolchains;
 import org.apache.maven.toolchain.model.ToolchainModel;
@@ -43,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.CURRENT;
 import static org.apache.maven.plugins.toolchain.jdk.ToolchainDiscoverer.VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,6 +94,63 @@ public class ToolchainDiscovererTest {
 
         assertEquals(1, models.size());
         assertEquals("21", models.get(0).getProvides().getProperty(VERSION));
+    }
+
+    @Test
+    void interruptedDiscoveryTerminatesItsProcess(@TempDir Path tempDir) throws Exception {
+        Path ready = tempDir.resolve("child-ready");
+        AtomicReference<Process> child = new AtomicReference<>();
+        AtomicBoolean interrupted = new AtomicBoolean();
+        CountDownLatch started = new CountDownLatch(1);
+        Path javaHome = Paths.get(System.getProperty("java.home"));
+        ToolchainDiscoverer discoverer = new ToolchainDiscoverer() {
+            @Override
+            Process startJavaProcess(Path java, Path output) throws IOException {
+                Process process = new ProcessBuilder(
+                                java.toString(),
+                                "-cp",
+                                System.getProperty("java.class.path"),
+                                WaitingJavaProcess.class.getName(),
+                                ready.toString())
+                        .redirectError(output.toFile())
+                        .start();
+                child.set(process);
+                started.countDown();
+                return process;
+            }
+        };
+        Thread worker = new Thread(() -> {
+            discoverer.doGetToolchainModel(javaHome);
+            interrupted.set(Thread.currentThread().isInterrupted());
+        });
+        try {
+            worker.start();
+            assertTrue(started.await(10, TimeUnit.SECONDS), "Owned Java process did not start");
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+            while (!Files.exists(ready) && System.nanoTime() < deadline) {
+                Thread.sleep(10);
+            }
+            assertTrue(Files.exists(ready), "Owned Java process did not become ready");
+            worker.interrupt();
+            worker.join(TimeUnit.SECONDS.toMillis(10));
+            assertFalse(worker.isAlive(), "Discovery did not return after interruption");
+            assertTrue(interrupted.get(), "Discovery lost the interrupt status");
+            assertFalse(child.get().isAlive(), "Discovery left its Java process running");
+        } finally {
+            if (child.get() != null && child.get().isAlive()) {
+                child.get().destroyForcibly();
+                child.get().waitFor(10, TimeUnit.SECONDS);
+            }
+            worker.interrupt();
+            worker.join(TimeUnit.SECONDS.toMillis(10));
+        }
+    }
+
+    public static class WaitingJavaProcess {
+        public static void main(String[] args) throws Exception {
+            Files.write(Paths.get(args[0]), new byte[0]);
+            Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+        }
     }
 
     @Test

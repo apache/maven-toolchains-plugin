@@ -285,19 +285,23 @@ public class ToolchainDiscoverer {
         List<String> lines;
         try {
             Path temp = Files.createTempFile("jdk-opts-", ".out");
+            Process process = null;
             try {
-                Process process = new ProcessBuilder()
-                        .command(java.toString(), "-XshowSettings:properties", "-version")
-                        .redirectError(temp.toFile())
-                        .start();
+                process = startJavaProcess(java, temp);
                 if (!process.waitFor(JAVA_PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                    process.destroyForcibly();
                     log.warn("JDK toolchain discovered at " + jdk + " will be ignored: java process timed out");
                     return null;
                 }
                 lines = Files.readAllLines(temp);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw e;
             } finally {
-                Files.delete(temp);
+                try {
+                    terminateProcess(process);
+                } finally {
+                    Files.delete(temp);
+                }
             }
         } catch (IOException | InterruptedException e) {
             if (e instanceof InterruptedException) {
@@ -329,6 +333,32 @@ public class ToolchainDiscoverer {
         configuration.addChild(jdkHome);
         model.setConfiguration(configuration);
         return model;
+    }
+
+    Process startJavaProcess(Path java, Path output) throws IOException {
+        return new ProcessBuilder()
+                .command(java.toString(), "-XshowSettings:properties", "-version")
+                .redirectError(output.toFile())
+                .start();
+    }
+
+    private static void terminateProcess(Process process) {
+        if (process == null || !process.isAlive()) {
+            return;
+        }
+        boolean interrupted = Thread.interrupted();
+        try {
+            process.destroyForcibly();
+            try {
+                process.waitFor(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private static Path getCanonicalPath(Path path) {
