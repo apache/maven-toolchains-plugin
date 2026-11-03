@@ -40,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,6 +88,7 @@ public class ToolchainDiscoverer {
     public static final String JAVA_HOME = "java.home";
 
     private static final String COMMA = ",";
+    private static final long JAVA_PROCESS_TIMEOUT_SECONDS = 30;
     public static final String USER_HOME = "user.home";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -147,22 +149,7 @@ public class ToolchainDiscoverer {
                         f.put(ENV, (val.isEmpty() ? "" : val + ",") + e.getKey());
                     });
 
-            List<ToolchainModel> tcs = jdks.parallelStream()
-                    .flatMap(s -> {
-                        ToolchainModel tc = getToolchainModel(s);
-                        if (tc == null) {
-                            return Stream.empty();
-                        }
-                        flags.getOrDefault(s, Collections.emptyMap())
-                                .forEach((k, v) -> tc.getProvides().setProperty(k, v));
-                        String version = tc.getProvides().getProperty(VERSION);
-                        if (isLts(version)) {
-                            tc.getProvides().setProperty(LTS, "true");
-                        }
-                        return Stream.of(tc);
-                    })
-                    .sorted(getToolchainModelComparator(comparator))
-                    .collect(Collectors.toList());
+            List<ToolchainModel> tcs = discoverToolchainModels(jdks, flags, comparator);
             writeCache();
             PersistedToolchains ps = new PersistedToolchains();
             ps.setToolchains(tcs);
@@ -175,6 +162,26 @@ public class ToolchainDiscoverer {
             }
             return new PersistedToolchains();
         }
+    }
+
+    List<ToolchainModel> discoverToolchainModels(
+            Set<Path> jdks, Map<Path, Map<String, String>> flags, String comparator) {
+        return jdks.parallelStream()
+                .flatMap(s -> {
+                    ToolchainModel tc = getToolchainModel(s);
+                    if (tc == null) {
+                        return Stream.empty();
+                    }
+                    flags.getOrDefault(s, Collections.emptyMap())
+                            .forEach((k, v) -> tc.getProvides().setProperty(k, v));
+                    String version = tc.getProvides().getProperty(VERSION);
+                    if (isLts(version)) {
+                        tc.getProvides().setProperty(LTS, "true");
+                    }
+                    return Stream.of(tc);
+                })
+                .sorted(getToolchainModelComparator(comparator))
+                .collect(Collectors.toList());
     }
 
     private static boolean isLts(String version) {
@@ -278,18 +285,29 @@ public class ToolchainDiscoverer {
         List<String> lines;
         try {
             Path temp = Files.createTempFile("jdk-opts-", ".out");
+            Process process = null;
             try {
-                new ProcessBuilder()
-                        .command(java.toString(), "-XshowSettings:properties", "-version")
-                        .redirectError(temp.toFile())
-                        .start()
-                        .waitFor();
+                process = startJavaProcess(java, temp);
+                if (!process.waitFor(JAVA_PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    log.warn("JDK toolchain discovered at " + jdk + " will be ignored: java process timed out");
+                    return null;
+                }
                 lines = Files.readAllLines(temp);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw e;
             } finally {
-                Files.delete(temp);
+                try {
+                    terminateProcess(process);
+                } finally {
+                    Files.delete(temp);
+                }
             }
         } catch (IOException | InterruptedException e) {
-            log.debug("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            log.warn("JDK toolchain discovered at " + jdk + " will be ignored: error executing java: " + e);
             return null;
         }
 
@@ -315,6 +333,32 @@ public class ToolchainDiscoverer {
         configuration.addChild(jdkHome);
         model.setConfiguration(configuration);
         return model;
+    }
+
+    Process startJavaProcess(Path java, Path output) throws IOException {
+        return new ProcessBuilder()
+                .command(java.toString(), "-XshowSettings:properties", "-version")
+                .redirectError(output.toFile())
+                .start();
+    }
+
+    private static void terminateProcess(Process process) {
+        if (process == null || !process.isAlive()) {
+            return;
+        }
+        boolean interrupted = Thread.interrupted();
+        try {
+            process.destroyForcibly();
+            try {
+                process.waitFor(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private static Path getCanonicalPath(Path path) {
