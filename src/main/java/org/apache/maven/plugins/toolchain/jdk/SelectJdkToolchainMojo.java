@@ -262,8 +262,17 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
     }
 
     private String getJdkHome(ToolchainPrivate toolchain) {
-        return ((Xpp3Dom) toolchain.getModel().getConfiguration())
-                .getChild("jdkHome")
-                .getValue();
+        ToolchainModel model = toolchain.getModel();
+        if (model == null) {
+            return null;
+        }
+        Object configuration = model.getConfiguration();
+        if (configuration instanceof Xpp3Dom) {
+            Xpp3Dom child = ((Xpp3Dom) configuration).getChild("jdkHome");
+            if (child != null) {
+                return child.getValue();
+            }
+        }
+        return null;
     }
 }
