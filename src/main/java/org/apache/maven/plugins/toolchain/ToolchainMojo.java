@@ -149,7 +149,7 @@ public class ToolchainMojo extends AbstractMojo {
             throw new MojoExecutionException("Misconfigured toolchains.", ex);
         }
 
-        getLog().error("No toolchain " + ((typeFound == 0) ? "found" : ("matched from " + typeFound + " found"))
+        getLog().error("No toolchain " + (typeFound == 0 ? "found" : ("matched from " + typeFound + " found"))
                 + " for type " + type);
 
         return false;
