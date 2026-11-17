@@ -18,7 +18,6 @@
  */
 package org.apache.maven.plugins.toolchain.jdk;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,7 +59,7 @@ public class ToolchainDiscovererTest {
 
     @Test
     @DisabledOnJre(JRE.JAVA_8) // java 8 often has jdk != jre
-    void testInvalidJdkDoesNotPreventDiscovery(@TempDir Path tempDir) throws IOException {
+    void testInvalidJdkDoesNotPreventDiscovery(@TempDir Path tempDir) throws Exception {
         Path invalidJdk = tempDir.resolve(".jdks").resolve("invalid-jdk");
         Path bin = invalidJdk.resolve("bin");
         Files.createDirectories(bin);
