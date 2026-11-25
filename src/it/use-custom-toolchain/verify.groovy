@@ -17,6 +17,6 @@
  * under the License.
  */
 
-content = new File( basedir, 'build.log' ).text
+content = new File(basedir, 'build.log').text
 
-assert content.indexOf( "Found expected tool named 'tool' at following location:" ) > 0
+assert content.indexOf("Found expected tool named 'tool' at following location:") > 0
