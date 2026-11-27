@@ -33,9 +33,6 @@ under the License.
       </item>
       <item name="Usage" href="usage.html">
         <item name="JDK Discovery Mechanism" href="toolchains/jdk-discovery.html"/>
-        <item name="Standard Toolchains" href="toolchains/index.html"/>
-        <item name="JDK Standard Toolchain" href="toolchains/jdk.html"/>
-        <item name="Custom Toolchains" href="toolchains/custom.html"/>
       </item>
       <item name="License" href="https://www.apache.org/licenses/"/>
       <item name="Download" href="download.html"/>

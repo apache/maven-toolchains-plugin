@@ -17,6 +17,6 @@
  * under the License.
  */
 
-content = new File( basedir, 'build.log' ).text
+content = new File(basedir, 'build.log').text
 
-assert content.indexOf( "MojoFailureException: Cannot find matching toolchain definitions for the following toolchain types:" ) > 0
+assert content.indexOf("MojoFailureException: Cannot find matching toolchain definitions for the following toolchain types:") > 0

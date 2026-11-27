@@ -39,7 +39,7 @@ Two associated helper goals are also provided:
 - [toolchains:display-discovered-jdk-toolchains](./display-discovered-jdk-toolchains-mojo.html) displays discovered JDK toolchains to the console,
 - [toolchains:generate-jdk-toolchains-xml](./generate-jdk-toolchains-xml-mojo.html) can be used to generate discovered JDKs in `toolchains.xml` format so the user can copy and paste.
 
-The previous `toolchain` goal is still available for JDK and [other types](./toolchains/custom.html) of toolchains:
+The previous `toolchain` goal is still available for JDK and [other types](https://maven.apache.org/guides/mini/guide-using-toolchains.html#Custom_Toolchains) of toolchains:
 
 - [toolchains:toolchain](./toolchain-mojo.html) selects a toolchain from `toolchains.xml` based on configured build requirements and stores it in build context for later retrieval by other plugins.
 ## Usage

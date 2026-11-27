@@ -76,7 +76,7 @@ That being said, you still need to configure the plugin in your `pom.xml` to sel
 </project>
 ```
 
-You can read more about which standard toolchains are available [here](./toolchains/index.html).
+You can read more about the JDK toolchain in the [Guide to Using Toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html#JDK_Toolchain).
 
 When executing, output will show toolchain(s) selection, for example:
 
@@ -107,7 +107,7 @@ Toolchains available on the building machine are described in `~/.m2/toolchains.
 
 See [Toolchains Descriptor](/ref/current/maven-core/toolchains.html) for details on its structure.
 
-You can read more about which elements standard toolchains propose [here](./toolchains/index.html).
+You can read more about which elements the JDK toolchain proposes in the [Guide to Using Toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html#JDK_Toolchain).
 
 Generic Plugin configuration information
 ----------------------------------------
