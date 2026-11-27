@@ -250,14 +250,40 @@ public class SelectJdkToolchainMojo extends AbstractMojo {
         return true;
     }
 
-    private boolean matches(String key, String reqVal, String tcVal) {
+    boolean matches(String key, String reqVal, String tcVal) {
         switch (key) {
             case VERSION:
-                return RequirementMatcherFactory.createVersionMatcher(tcVal).matches(reqVal);
+                if (RequirementMatcherFactory.createVersionMatcher(tcVal).matches(reqVal)) {
+                    return true;
+                }
+                // DefaultArtifactVersion does not parse the legacy (pre-Java 9) "1.8.0_432" scheme, so a
+                // requirement like "8", "1.8" or "1.8.0" never matches a toolchain's actual, fully
+                // qualified version string even though they name the same feature release. Fall back to
+                // comparing JDK feature versions directly.
+                Optional<Integer> reqFeature = jdkFeatureVersion(reqVal);
+                return reqFeature.isPresent() && reqFeature.equals(jdkFeatureVersion(tcVal));
             case ENV:
                 return tcVal.matches("(.*,|^)\\Q" + reqVal + "\\E(,.*|$)");
             default:
                 return RequirementMatcherFactory.createExactMatcher(tcVal).matches(reqVal);
+        }
+    }
+
+    /**
+     * Extracts the JDK feature version (for example {@code 8} from both {@code "1.8.0_432"} and {@code "8"})
+     * from a JDK version string, following the legacy (pre-Java 9) and current (JEP 223) numbering schemes.
+     *
+     * @param version the JDK version string
+     * @return the feature version, or empty if {@code version} does not start with a number
+     */
+    private static Optional<Integer> jdkFeatureVersion(String version) {
+        String[] parts = version.split("[._+\\-]");
+        try {
+            int first = Integer.parseInt(parts[0]);
+            // legacy scheme: 1.<feature>[.<update>[_<build>]]
+            return Optional.of(first == 1 && parts.length > 1 ? Integer.parseInt(parts[1]) : first);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
         }
     }
 
